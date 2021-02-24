@@ -7,7 +7,7 @@
 # Todo: Stalemate check
 
 from abc import ABC
-from typing import Optional
+# from typing import Optional
 
 
 # Abstract class to model chess pieces by providing necessary attributes
@@ -26,14 +26,15 @@ class Piece(ABC):
         self.player: int = thisPlayer
 
 
-# Pawn class (note that all pawn moves are atypical, to a strange degree, so no 'typical' moves are listed)
+# Pawn class (note that all pawn moves are atypical, to a strange
+# degree, so no 'typical' moves are listed)
 class Pawn(Piece):
     name = "pawn"
     symbol = "p"
     value = 1
     moves = None  # all pawn movements are affected by surrounding pieces
     scalable = False
-    specialMoves = True
+    specialMoves = frozenset([(1, 0), (1, 1), (1, -1), (2, 0)])
 
 
 # Knight class
@@ -41,16 +42,8 @@ class Knight(Piece):
     name = "knight"
     symbol = "N"
     value = 3
-    moves = frozenset([
-        (2, 1),
-        (2, -1),
-        (-2, 1),
-        (-2, -1),
-        (1, 2),
-        (-1, 2),
-        (-1, -2),
-        (1, -2),
-    ])
+    moves = frozenset([(2, 1),  (2, -1),  (-2, 1),  (-2, -1),  (1, 2),  (-1, 2),
+                        (-1, -2), (1, -2)])
     scalable = False
     specialMoves = False
 
@@ -65,14 +58,15 @@ class Bishop(Piece):
     specialMoves = False
 
 
-# Rook class (note that it is not marked as special because it can't initiate castling, only follows it)
+# Rook class (note that it is not marked as special because it can't
+# initiate castling, only follows it)
 class Rook(Piece):
     name = "rook"
     symbol = "R"
     value = 5
     moves = frozenset([(1, 0), (-1, 0), (0, 1), (0, -1)])
     scalable = True
-    specialMoves = True
+    specialMoves = frozenset([(0, 3), (0, -2)])
 
 
 # Queen class
@@ -94,10 +88,11 @@ class King(Piece):
     moves = frozenset([(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1),
                        (-1, -1), (-1, 1)])
     scalable = False
-    specialMoves = True
+    specialMoves = frozenset([(0, -2), (0, 2)])
 
 
-# Class that represents one square on a board (note that indexing in Python is from 0, so translation is required)
+# Class that represents one square on a board (note that indexing
+# in Python is from 0, so translation is required)
 class Square(object):
     row: int
     column: int
@@ -165,14 +160,8 @@ class Board(object):		# Square objects are assigned a location on a
     # This method sets up each individual piece on the 'grid'
     def setup(self):
 
-        [
-            self.grid[1][column].setPiece(Pawn(1))
-            for column in range(self.numColumns)
-        ]
-        [
-            self.grid[6][column].setPiece(Pawn(2))
-            for column in range(self.numColumns)
-        ]
+        [self.grid[1][column].setPiece(Pawn(1)) for column in range(self.numColumns)]
+        [self.grid[6][column].setPiece(Pawn(2)) for column in range(self.numColumns)]
         [self.grid[0][column].setPiece(Rook(1)) for column in [0, 7]]
         [self.grid[7][column].setPiece(Rook(2)) for column in [0, 7]]
         [self.grid[0][column].setPiece(Knight(1)) for column in [1, 6]]
@@ -316,10 +305,11 @@ class Board(object):		# Square objects are assigned a location on a
         if row in range(self.numRows) and column in range(self.numColumns):
             return self.grid[row][column]
         else:
-            return None #raise ValueError("Chess board is 8x8, please using 0-7 indices")
+            return None #raise ValueError("Please use 0-7 indices")
 
     # Get all possible moves (even if capturing an piece)
-    # For this to work, the piece is "walked" along the board until it runs out or hits an opponent or neighbor
+    # For this to work, the piece is "walked" along the board until
+    # it runs out or hits an opponent or neighbor
     def getMoves(self, start: Square) -> frozenset:
         if start is None:
             return frozenset()
@@ -433,25 +423,26 @@ class Board(object):		# Square objects are assigned a location on a
             firstMove = self.getSquare(row, kingColumn + 1)
             secondMove = self.getSquare(row, kingColumn + 2)
             rookSquare = self.getSquare(row, rookColumn)
-            if not (rookSquare is None or rookSquare.piece is None or
-                    rookSquare.piece.name != "rook" or rookSquare.piece.moved
-                    or firstMove is None or firstMove.piece is not None
-                    or secondMove is None or secondMove.piece is not None):
+            if rookSquare is not None and rookSquare.piece is not None and \
+                    rookSquare.piece.name == "rook" and not rookSquare.piece.moved and \
+                    firstMove is not None and firstMove.piece is None and \
+                    secondMove is not None or secondMove.piece is None:
                 moves = moves.union([secondMove])
             rookColumn = 0
             firstMove = self.getSquare(row, kingColumn - 1)
             secondMove = self.getSquare(row, kingColumn - 2)
             thirdMove = self.getSquare(row, kingColumn - 3)
             rookSquare = self.getSquare(row, rookColumn)
-            if not (rookSquare is None or rookSquare.piece is None or
-                    rookSquare.piece.name != "rook" or rookSquare.piece.moved
-                    or firstMove is None or firstMove.piece is not None
-                    or secondMove is None or secondMove.piece is not None
-                    or thirdMove is None or thirdMove.piece is not None):
+            if rookSquare is not None and rookSquare.piece is not None and \
+                    rookSquare.piece.name == "rook" and not rookSquare.piece.moved and \
+                    firstMove is not None and firstMove.piece is None and \
+                    secondMove is not None or secondMove.piece is None and \
+                    thirdMove is not None and thirdMove.piece is None:
                 moves = moves.union([secondMove])
         return moves
 
-    # Combines all possible moves from one player to see where the opponent's king would be in check or not
+    # Combines all possible moves from one player to see where
+    # the opponent's king would be in check or not
     def checkZone(self, aggressor: int) -> frozenset:
         checkZone = frozenset()
         for checkRow in self.grid:
@@ -626,84 +617,28 @@ while gameOn:
                     if endSquare in moves:
 
                         # if castling...
-                        if (startSquare.piece.name == "king"
-                                and startSquare.row == endSquare.row
-                                and abs(endSquare.column - startSquare.column)
-                                == 2):
+                        if startSquare.piece.name == "king" and \
+                                startSquare.row == endSquare.row and \
+                                abs(endSquare.column - startSquare.column) == 2:
+                            endSquare.piece = startSquare.piece
+                            startSquare.piece = None
                             row = endSquare.row
-
-                            # look for checking along castle (must not enter or leave check)
-                            if endSquare.column > startSquare.column:
-                                startColumnKing = 4
-                                endColumnRook = 5
-                                endColumnKing = 6
-                                extraColumn = None
-                                startColumnRook = 7
+                            if endSquare.column <= 3:
+                                rookColumn = 0
+                                rookColumnMove = 3
                             else:
-                                startColumnKing = 4
-                                endColumnRook = 3
-                                endColumnKing = 2
-                                extraColumn = 1
-                                startColumnRook = 0
-                            startSquareKing = startSquare
-                            startSquareRook = board.getSquare(
-                                row, startColumnRook)
-                            endSquareKing = endSquare
-                            endSquareRook = board.getSquare(row, endColumnRook)
-
-                            # Make sure path is clear for castling
-                            clearPath = False
-                            if (endSquareKing.piece is None
-                                    and endSquareRook.piece is None):
-                                if extraColumn is not None:
-                                    extraSquare = board.getSquare(
-                                        row, extraColumn)
-                                    if extraSquare.piece is None:
-                                        clearPath = True
-                                else:
-                                    clearPath = True
-
-                            # Make sure king never encounters check
-                            clearCheck = True
-                            if (board.check(startSquareKing, player)
-                                    or board.check(endSquareRook, player)
-                                    or board.check(endSquareKing, player)):
-                                clearCheck = False
-
-                            # Make sure king and rook have never been moved
-                            firstMoves = True
-                            # noinspection PyUnresolvedReferences
-                            if (startSquareRook.piece.moved
-                                    or startSquareKing.piece.moved):
-                                firstMoves = False
-
-                            # move pieces if everything looks good
-                            if clearPath and clearCheck and firstMoves:
-                                endSquareKing.piece = startSquareKing.piece
-                                startSquareKing.piece = None
-                                endSquareRook.piece = startSquareRook.piece
-                                startSquareRook.piece = None
-                                break
-
-                            # Explain why the castle move was rejected:
-                            if not firstMoves:
-                                print(
-                                    "The king and/or the rook must have moved yet"
-                                )
-                            elif not clearPath:
-                                print(
-                                    "Your path must be clear of any pieces in order to castle"
-                                )
-                            elif not clearCheck:
-                                print(
-                                    "You may not castle from, through, or into check"
-                                )
-                        # Todo: may need to add other pawn responses (don't think so, though)
+                                rookColumn = 7
+                                rookColumnMove = -2
+                            rookStartSquare = board.getSquare(row, rookColumn)
+                            rookEndSquare = board.getSquare(row, rookColumn + rookColumnMove)
+                            rookEndSquare.piece = rookStartSquare.piece
+                            rookStartSquare.piece = None
+                            break
 
                         # If pawn reaches other side, it is promoted to a better piece...
                         elif startSquare.piece.name == "pawn" and (
-                            (player == 1 and endSquare.row == 7) or
-                            (player == 2 and endSquare.row == 0)):
+                                (player == 1 and endSquare.row == 7) or
+                                (player == 2 and endSquare.row == 0)):
                             endSquare.piece = startSquare.piece
                             startSquare.piece = None
                             print("Your pawn has been promoted!")
@@ -741,9 +676,7 @@ while gameOn:
                             startSquare.piece = None
                             if board.check(board.findKing(player), player):
                                 if inCheck:
-                                    print(
-                                        "Your move places you in check, please try again"
-                                    )
+                                    print("Your move places you in check, please try again")
                                 else:
                                     print("Your move keeps you in check")
                                 startSquare.piece = endSquare.piece
