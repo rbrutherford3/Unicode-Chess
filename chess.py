@@ -4,10 +4,8 @@
 #                                                               #
 #################################################################
 
-# Todo: Stalemate check
 
 from abc import ABC
-# from typing import Optional
 
 
 # Abstract class to model chess pieces by providing necessary attributes
@@ -42,8 +40,8 @@ class Knight(Piece):
     name = "knight"
     symbol = "N"
     value = 3
-    moves = frozenset([(2, 1),  (2, -1),  (-2, 1),  (-2, -1),  (1, 2),  (-1, 2),
-                        (-1, -2), (1, -2)])
+    moves = frozenset([(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (-1, 2),
+                       (-1, -2), (1, -2)])
     scalable = False
     specialMoves = False
 
@@ -82,6 +80,10 @@ class Queen(Piece):
 
 # King class
 class King(Piece):
+    def __init__(self, thisPlayer: int):
+        super().__init__(thisPlayer)
+        self.location = None
+
     name = "king"
     symbol = "K"
     value = None
@@ -117,7 +119,7 @@ class Square(object):
 
 
 # Converts user shorthand for squares into row and column tuple for use in program
-def decode(code: str):		# -> Optional[tuple[int, int]]:
+def decode(code: str):  # -> Optional[tuple[int, int]]:
     letters: list[str] = ["a", "b", "c", "d", "e", "f", "g", "h"]
     if len(code) == 2:
         char1: str = code[0]
@@ -143,8 +145,8 @@ def opponent(player):
 
 
 # Board class, which holds most functioning and is composed of 64 square objects
-class Board(object):		# Square objects are assigned a location on a
-    grid: list # [list[Square]] # two-dimensional gridded 'board'
+class Board(object):  # Square objects are assigned a location on a
+    grid: list  # [list[Square]] # two-dimensional gridded 'board'
     numRows: int = 8
     numColumns: int = 8
 
@@ -156,6 +158,17 @@ class Board(object):		# Square objects are assigned a location on a
             Square(gridRow, gridColumn)
             for gridColumn in range(self.numColumns)
         ] for gridRow in range(self.numRows)]
+
+        self.King1 = King(1)
+        self.King2 = King(2)
+
+    def getKing(self, player) -> King:
+        if player == 1:
+            return self.King1
+        elif player == 2:
+            return self.King2
+        else:
+            raise ValueError("Player can be either 1 or 2")
 
     # This method sets up each individual piece on the 'grid'
     def setup(self):
@@ -170,134 +183,74 @@ class Board(object):		# Square objects are assigned a location on a
         [self.grid[7][column].setPiece(Bishop(2)) for column in [2, 5]]
         self.grid[0][3].setPiece(Queen(1))
         self.grid[7][3].setPiece(Queen(2))
-        self.grid[0][4].setPiece(King(1))
-        self.grid[7][4].setPiece(King(2))
+        self.grid[0][4].setPiece(self.King1)
+        self.King1.location = self.grid[0][4]
+        self.grid[7][4].setPiece(self.King2)
+        self.King2.location = self.grid[7][4]
 
     # Draw the board onto the screen with unicode ASCII characters (old school, yes)
     def draw(self):
 
         print("")
-        print(
-            "        a       b       c       d       e       f       g       h"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(" 8  |  " + str(self.grid[7][0]) + "  |//" +
-              str(self.grid[7][1]) + "//|  " + str(self.grid[7][2]) + "  |//" +
-              str(self.grid[7][3]) + "//|  " + str(self.grid[7][4]) + "  |//" +
-              str(self.grid[7][5]) + "//|  " + str(self.grid[7][6]) + "  |//" +
-              str(self.grid[7][7]) + "//|  8")
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(" 7  |//" + str(self.grid[6][0]) + "//|  " +
-              str(self.grid[6][1]) + "  |//" + str(self.grid[6][2]) + "//|  " +
-              str(self.grid[6][3]) + "  |//" + str(self.grid[6][4]) + "//|  " +
-              str(self.grid[6][5]) + "  |//" + str(self.grid[6][6]) + "//|  " +
-              str(self.grid[6][7]) + "  |  7")
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(" 6  |  " + str(self.grid[5][0]) + "  |//" +
-              str(self.grid[5][1]) + "//|  " + str(self.grid[5][2]) + "  |//" +
-              str(self.grid[5][3]) + "//|  " + str(self.grid[5][4]) + "  |//" +
-              str(self.grid[5][5]) + "//|  " + str(self.grid[5][6]) + "  |//" +
-              str(self.grid[5][7]) + "//|  6")
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(" 5  |//" + str(self.grid[4][0]) + "//|  " +
-              str(self.grid[4][1]) + "  |//" + str(self.grid[4][2]) + "//|  " +
-              str(self.grid[4][3]) + "  |//" + str(self.grid[4][4]) + "//|  " +
-              str(self.grid[4][5]) + "  |//" + str(self.grid[4][6]) + "//|  " +
-              str(self.grid[4][7]) + "  |  5")
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(" 4  |  " + str(self.grid[3][0]) + "  |//" +
-              str(self.grid[3][1]) + "//|  " + str(self.grid[3][2]) + "  |//" +
-              str(self.grid[3][3]) + "//|  " + str(self.grid[3][4]) + "  |//" +
-              str(self.grid[3][5]) + "//|  " + str(self.grid[3][6]) + "  |//" +
-              str(self.grid[3][7]) + "//|  4")
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(" 3  |//" + str(self.grid[2][0]) + "//|  " +
-              str(self.grid[2][1]) + "  |//" + str(self.grid[2][2]) + "//|  " +
-              str(self.grid[2][3]) + "  |//" + str(self.grid[2][4]) + "//|  " +
-              str(self.grid[2][5]) + "  |//" + str(self.grid[2][6]) + "//|  " +
-              str(self.grid[2][7]) + "  |  3")
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(" 2  |  " + str(self.grid[1][0]) + "  |//" +
-              str(self.grid[1][1]) + "//|  " + str(self.grid[1][2]) + "  |//" +
-              str(self.grid[1][3]) + "//|  " + str(self.grid[1][4]) + "  |//" +
-              str(self.grid[1][5]) + "//|  " + str(self.grid[1][6]) + "  |//" +
-              str(self.grid[1][7]) + "//|  2")
-        print(
-            "    |       |///////|       |///////|       |///////|       |///////|"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(" 1  |//" + str(self.grid[0][0]) + "//|  " +
-              str(self.grid[0][1]) + "  |//" + str(self.grid[0][2]) + "//|  " +
-              str(self.grid[0][3]) + "  |//" + str(self.grid[0][4]) + "//|  " +
-              str(self.grid[0][5]) + "  |//" + str(self.grid[0][6]) + "//|  " +
-              str(self.grid[0][7]) + "  |  1")
-        print(
-            "    |///////|       |///////|       |///////|       |///////|       |"
-        )
-        print(
-            "    -----------------------------------------------------------------"
-        )
-        print(
-            "        a       b       c       d       e       f       g       h"
-        )
+        print("        a       b       c       d       e       f       g       h")
+        print("    -----------------------------------------------------------------")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print(" 8  |  " + str(self.grid[7][0]) + "  |//" + str(self.grid[7][1]) +
+              "//|  " + str(self.grid[7][2]) + "  |//" + str(self.grid[7][3]) +
+              "//|  " + str(self.grid[7][4]) + "  |//" + str(self.grid[7][5]) +
+              "//|  " + str(self.grid[7][6]) + "  |//" + str(self.grid[7][7]) + "//|  8")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print("    -----------------------------------------------------------------")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print(" 7  |//" + str(self.grid[6][0]) + "//|  " + str(self.grid[6][1]) +
+              "  |//" + str(self.grid[6][2]) + "//|  " + str(self.grid[6][3]) +
+              "  |//" + str(self.grid[6][4]) + "//|  " + str(self.grid[6][5]) +
+              "  |//" + str(self.grid[6][6]) + "//|  " + str(self.grid[6][7]) + "  |  7")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print("    -----------------------------------------------------------------")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print(" 6  |  " + str(self.grid[5][0]) + "  |//" + str(self.grid[5][1]) +
+              "//|  " + str(self.grid[5][2]) + "  |//" + str(self.grid[5][3]) +
+              "//|  " + str(self.grid[5][4]) + "  |//" + str(self.grid[5][5]) +
+              "//|  " + str(self.grid[5][6]) + "  |//" + str(self.grid[5][7]) + "//|  6")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print("    -----------------------------------------------------------------")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print(" 5  |//" + str(self.grid[4][0]) + "//|  " + str(self.grid[4][1]) +
+              "  |//" + str(self.grid[4][2]) + "//|  " + str(self.grid[4][3]) +
+              "  |//" + str(self.grid[4][4]) + "//|  " + str(self.grid[4][5]) +
+              "  |//" + str(self.grid[4][6]) + "//|  " + str(self.grid[4][7]) + "  |  5")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print("    -----------------------------------------------------------------")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print(" 4  |  " + str(self.grid[3][0]) + "  |//" + str(self.grid[3][1]) +
+              "//|  " + str(self.grid[3][2]) + "  |//" + str(self.grid[3][3]) +
+              "//|  " + str(self.grid[3][4]) + "  |//" + str(self.grid[3][5]) +
+              "//|  " + str(self.grid[3][6]) + "  |//" + str(self.grid[3][7]) + "//|  4")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print("    -----------------------------------------------------------------")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print(" 3  |//" + str(self.grid[2][0]) + "//|  " + str(self.grid[2][1]) +
+              "  |//" + str(self.grid[2][2]) + "//|  " + str(self.grid[2][3]) +
+              "  |//" + str(self.grid[2][4]) + "//|  " + str(self.grid[2][5]) +
+              "  |//" + str(self.grid[2][6]) + "//|  " + str(self.grid[2][7]) + "  |  3")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print("    -----------------------------------------------------------------")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print(" 2  |  " + str(self.grid[1][0]) + "  |//" + str(self.grid[1][1]) +
+              "//|  " + str(self.grid[1][2]) + "  |//" + str(self.grid[1][3]) +
+              "//|  " + str(self.grid[1][4]) + "  |//" + str(self.grid[1][5]) +
+              "//|  " + str(self.grid[1][6]) + "  |//" + str(self.grid[1][7]) + "//|  2")
+        print("    |       |///////|       |///////|       |///////|       |///////|")
+        print("    -----------------------------------------------------------------")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print(" 1  |//" + str(self.grid[0][0]) + "//|  " + str(self.grid[0][1]) +
+              "  |//" + str(self.grid[0][2]) + "//|  " + str(self.grid[0][3]) +
+              "  |//" + str(self.grid[0][4]) + "//|  " + str(self.grid[0][5]) +
+              "  |//" + str(self.grid[0][6]) + "//|  " + str(self.grid[0][7]) + "  |  1")
+        print("    |///////|       |///////|       |///////|       |///////|       |")
+        print("    -----------------------------------------------------------------")
+        print("        a       b       c       d       e       f       g       h")
         print("")
 
     # Reference a particular square on the grid
@@ -305,7 +258,7 @@ class Board(object):		# Square objects are assigned a location on a
         if row in range(self.numRows) and column in range(self.numColumns):
             return self.grid[row][column]
         else:
-            return None #raise ValueError("Please use 0-7 indices")
+            return None  # raise ValueError("Please use 0-7 indices")
 
     # Get all possible moves (even if capturing an piece)
     # For this to work, the piece is "walked" along the board until
@@ -338,13 +291,9 @@ class Board(object):		# Square objects are assigned a location on a
                             else:
                                 if square.piece is None:
                                     moves = moves.union([square])
-                                    if (
-                                            not start.piece.scalable
-                                    ):  # Stop if limited to move one square only
+                                    if not start.piece.scalable:  # Stop if limited to move one square only
                                         break
-                                elif (
-                                        square.piece.player == otherPlayer
-                                ):  # Stop if opponent is encountered (capture)
+                                elif square.piece.player == otherPlayer:  # Stop if opponent is encountered (capture)
                                     moves = moves.union([square])
                                     break
                                 else:  # Go until the end
@@ -359,7 +308,7 @@ class Board(object):		# Square objects are assigned a location on a
             return moves
         if square.piece is None:
             return moves
-        if square.piece.name == "pawn":
+        if isinstance(square.piece, Pawn):
             row = square.row
             column = square.column
             player = square.piece.player
@@ -412,33 +361,33 @@ class Board(object):		# Square objects are assigned a location on a
     # Other than the typical moves, a king has castling opportunities
     # There are two castling directions: King-side (4 squares wide) and Queen-side (5 squares wide)
     # This method adds those moves only if they are eligible (not in check, path clear, etc)
-    def getKingMoves(self, kingSquare: Square) -> frozenset:
+    def getKingMoves(self, player: int) -> frozenset:
         moves = frozenset()
-        if kingSquare.piece.name == "king":
-            if kingSquare.piece.moved:
-                return frozenset()
-            row = kingSquare.row
-            kingColumn = kingSquare.column
-            rookColumn = 7
-            firstMove = self.getSquare(row, kingColumn + 1)
-            secondMove = self.getSquare(row, kingColumn + 2)
-            rookSquare = self.getSquare(row, rookColumn)
-            if rookSquare is not None and rookSquare.piece is not None and \
-                    rookSquare.piece.name == "rook" and not rookSquare.piece.moved and \
-                    firstMove is not None and firstMove.piece is None and \
-                    secondMove is not None or secondMove.piece is None:
-                moves = moves.union([secondMove])
-            rookColumn = 0
-            firstMove = self.getSquare(row, kingColumn - 1)
-            secondMove = self.getSquare(row, kingColumn - 2)
-            thirdMove = self.getSquare(row, kingColumn - 3)
-            rookSquare = self.getSquare(row, rookColumn)
-            if rookSquare is not None and rookSquare.piece is not None and \
-                    rookSquare.piece.name == "rook" and not rookSquare.piece.moved and \
-                    firstMove is not None and firstMove.piece is None and \
-                    secondMove is not None or secondMove.piece is None and \
-                    thirdMove is not None and thirdMove.piece is None:
-                moves = moves.union([secondMove])
+        king = self.getKing(player)
+        if king.moved:
+            return frozenset()
+        row = king.location.row
+        kingColumn = king.location.column
+        rookColumn = 7
+        firstMove = self.getSquare(row, kingColumn + 1)
+        secondMove = self.getSquare(row, kingColumn + 2)
+        rookSquare = self.getSquare(row, rookColumn)
+        if rookSquare is not None and rookSquare.piece is not None and \
+                isinstance(rookSquare.piece, Rook) and not rookSquare.piece.moved and \
+                firstMove is not None and firstMove.piece is None and \
+                secondMove is not None or secondMove.piece is None:
+            moves = moves.union([secondMove])
+        rookColumn = 0
+        firstMove = self.getSquare(row, kingColumn - 1)
+        secondMove = self.getSquare(row, kingColumn - 2)
+        thirdMove = self.getSquare(row, kingColumn - 3)
+        rookSquare = self.getSquare(row, rookColumn)
+        if rookSquare is not None and rookSquare.piece is not None and \
+                isinstance(rookSquare.piece, Rook) and not rookSquare.piece.moved and \
+                firstMove is not None and firstMove.piece is None and \
+                secondMove is not None or secondMove.piece is None and \
+                thirdMove is not None and thirdMove.piece is None:
+            moves = moves.union([secondMove])
         return moves
 
     # Combines all possible moves from one player to see where
@@ -450,7 +399,7 @@ class Board(object):		# Square objects are assigned a location on a
                 if checkSquare.piece is not None:
                     if checkSquare.piece.player == aggressor:
                         # Again, pawns are unique in their movements, so they are added separately
-                        if checkSquare.piece.name == "pawn":
+                        if isinstance(checkSquare.piece, Pawn):
                             if aggressor == 1:
                                 eastSquare = self.getSquare(
                                     checkSquare.row + 1,
@@ -475,18 +424,8 @@ class Board(object):		# Square objects are assigned a location on a
         return checkZone
 
     # Applies the above method to a specific piece
-    def check(self, square: Square, player: int) -> bool:
-        return square in self.checkZone(opponent(player))
-
-    # Brute force loop through the entire grid to find the king
-    # Due to how the data has been set up, there aren't any ways to quickly refer to a specific piece
-    def findKing(self, player: int) -> Square:
-        for row in self.grid:
-            for square in row:
-                if square.piece is not None:
-                    if square.piece.player == player:
-                        if square.piece.name == "king":
-                            return square
+    def check(self, player: int) -> bool:
+        return self.getKing(player).location in self.checkZone(opponent(player))
 
     # For all moves on one side, move each piece once to see if the king would still be in check (checkmate)
     # The pieces are walked back from the check to preserve the layout
@@ -495,15 +434,13 @@ class Board(object):		# Square objects are assigned a location on a
     def checkmate(self, forPlayer: int) -> bool:
         checkmated = True
         for row in self.grid:
-            square: Square
             for square in row:
                 if square.piece is not None and square.piece.player == forPlayer:
-                    if square.piece.name == "pawn":
+                    if isinstance(square.piece, Pawn):
                         testMoves = self.getPawnMoves(square)
                     else:
                         testMoves = self.getMoves(square)
                     if testMoves is not None:
-                        move: Square
                         for move in testMoves:
                             pieceSaved = False
                             savedPiece = None
@@ -512,10 +449,13 @@ class Board(object):		# Square objects are assigned a location on a
                                 savedPiece = move.piece
                             move.piece = square.piece
                             square.piece = None
-                            if not self.check(self.findKing(forPlayer),
-                                              forPlayer):
+                            if isinstance(move.piece, King):
+                                self.getKing(forPlayer).location = move
+                            if not self.check(forPlayer):
                                 checkmated = False
                             square.piece = move.piece
+                            if isinstance(square.piece, King):
+                                self.getKing(forPlayer).location = square
                             if pieceSaved:
                                 move.piece = savedPiece
                             else:
@@ -525,26 +465,26 @@ class Board(object):		# Square objects are assigned a location on a
     # If no moves are possible for a given side, then there is a stalemate
     def stalemate(self, player: int) -> bool:
         stalemate = False
+        moves = frozenset()
         for row in self.grid:
             for square in row:
                 if square is not None:
                     if square.piece is not None:
                         if square.piece.player == player:
-                            moves: frozenset = frozenset()
-                            if square.piece.name == "king":
+                            if isinstance(square.piece, King):
                                 moves = moves.union(
                                     self.getMoves(square).union(
-                                        self.getKingMoves(square)))
-                            elif square.piece.name == "pawn":
+                                        self.getKingMoves(player)))
+                            elif isinstance(square.piece, Pawn):
                                 moves = moves.union(self.getPawnMoves(square))
                             else:
                                 moves = moves.union(self.getMoves(square))
-                            if len(moves) == 0:
-                                stalemate = True
+        if len(moves) == 0:
+            stalemate = True
         return stalemate
 
 
-### SET UP USER INTERFACE FOR GAMEPLAY ###
+# SET UP USER INTERFACE FOR GAMEPLAY
 
 board = Board()  # Need an instance of the board to refer to it's methods
 board.setup()
@@ -559,13 +499,17 @@ while gameOn:
 
     # Check to see if there was a game ending situation
     inCheck = False
-    if board.check(board.findKing(player), player):
+    king = board.getKing(player)
+    if board.check(player):
         if board.checkmate(player):
             print("Checkmate!  You lose!")
             break
         else:
             inCheck = True
             print("You are in check!")
+    elif board.stalemate(player):
+        print("No legal moves left!  Stalemate")
+        break
 
     # Cycle through user input for moves (square for beginning, square for ending)
     while True:
@@ -593,11 +537,11 @@ while gameOn:
                             print("Please select a player on your own side")
 
         # Gather moves possibilities for special pieces and all other pieces, too
-        if startSquare.piece.name == "pawn":
+        if isinstance(startSquare.piece, Pawn):
             moves = board.getPawnMoves(startSquare)
-        elif startSquare.piece.name == "king":
+        elif isinstance(startSquare.piece, King):
             moves = board.getMoves(startSquare).union(
-                board.getKingMoves(startSquare))
+                board.getKingMoves(player))
         else:
             moves = board.getMoves(startSquare)
         print("Select move")
@@ -617,10 +561,10 @@ while gameOn:
                     if endSquare in moves:
 
                         # if castling...
-                        if startSquare.piece.name == "king" and \
-                                startSquare.row == endSquare.row and \
+                        if isinstance(startSquare.piece, King) and \
                                 abs(endSquare.column - startSquare.column) == 2:
                             endSquare.piece = startSquare.piece
+                            king.location = endSquare
                             startSquare.piece = None
                             row = endSquare.row
                             if endSquare.column <= 3:
@@ -636,7 +580,7 @@ while gameOn:
                             break
 
                         # If pawn reaches other side, it is promoted to a better piece...
-                        elif startSquare.piece.name == "pawn" and (
+                        elif isinstance(startSquare.piece, Pawn) and (
                                 (player == 1 and endSquare.row == 7) or
                                 (player == 2 and endSquare.row == 0)):
                             endSquare.piece = startSquare.piece
@@ -673,13 +617,17 @@ while gameOn:
                         else:
                             savedPiece = endSquare.piece
                             endSquare.piece = startSquare.piece
+                            if isinstance(endSquare.piece, King):
+                                king.location = endSquare
                             startSquare.piece = None
-                            if board.check(board.findKing(player), player):
+                            if board.check(player):
                                 if inCheck:
                                     print("Your move places you in check, please try again")
                                 else:
                                     print("Your move keeps you in check")
                                 startSquare.piece = endSquare.piece
+                                if isinstance(endSquare.piece, King):
+                                    king.location = startSquare
                                 endSquare.piece = savedPiece
                             else:
                                 break
@@ -689,12 +637,19 @@ while gameOn:
     # Track the first move of each piece since some moves require that no previous moves have been made
     endSquare.piece.moved = True
 
+    board.draw()  # redraw once more to show the player their completed move before a possible message
+
     # Check for game ending situations
-    if board.check(board.findKing(otherPlayer), otherPlayer):
+    if board.check(otherPlayer):
         if board.checkmate(otherPlayer):
             print("Checkmate!  You win!")
         else:
             print("You placed your opponent in check!")
+    elif board.stalemate(otherPlayer):
+        print("No legal moves left!  Stalemate")
+
+    print("(Press enter to continue)")
+    input()
 
     # Switch players
     if player == 1:
