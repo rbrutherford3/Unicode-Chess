@@ -1,6 +1,6 @@
 # ASCII-Chess (now with online games)
 
-This program is four Python files to play games of two-player chess using monospace characters and algebraic notation to dictate moves.  All rules of chess are enforced, including check, checkmate, special pawn moves, promotion of pawn after reaching the other side, king-side and queen-side castle, etc.  A game can be played either at the same machine (trading places for each turn) or online between two machines (more below).
+This program is four Python files to play games of two-player chess using monospace characters and algebraic notation to dictate moves.  All rules of chess are enforced, including check, checkmate, en passant, pawn promotion, king-side and queen-side castle, etc.  A game can be played either at the same machine (trading places for each turn) or online between two machines (more below).
 
 ![Program Startup](screenshot.png)
 

@@ -35,6 +35,8 @@ class Pawn(Piece):
     moves = None  # all pawn movements are affected by surrounding pieces
     scalable = False
     specialMoves = frozenset([(1, 0), (1, 1), (1, -1), (2, 0)])
+    # Identify if you had just moved two spaces for "en passant" capture
+    enPassant = False
 
 
 # Knight class
@@ -82,10 +84,6 @@ class Queen(Piece):
 
 # King class
 class King(Piece):
-    def __init__(self, thisPlayer: int):
-        super().__init__(thisPlayer)
-        self.location = None
-
     name = "king"
     symbol = "K"
     value = None
@@ -93,3 +91,4 @@ class King(Piece):
                        (-1, -1), (-1, 1)])
     scalable = False
     specialMoves = frozenset([(0, -2), (0, 2)])
+    location: None

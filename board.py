@@ -44,6 +44,10 @@ class Square(object):
 
 
 # Board class, which holds most functioning and is composed of 64 square objects
+def isSquare(row: int, column: int) -> bool:
+    return 0 <= row <= 7 and 0 <= column <= 7
+
+
 class Board(object):  # Square objects are assigned a location on a
     grid: list  # [list[Square]] # two-dimensional gridded 'board'
     numRows: int = 8
@@ -58,15 +62,15 @@ class Board(object):  # Square objects are assigned a location on a
             for gridColumn in range(self.numColumns)
         ] for gridRow in range(self.numRows)]
 
-        self.King1 = King(1)
-        self.King2 = King(2)
+        self.king1 = King(1)
+        self.king2 = King(2)
 
     # Need quick access to the king for each side to speed up program
     def getKing(self, player) -> King:
         if player == 1:
-            return self.King1
+            return self.king1
         elif player == 2:
-            return self.King2
+            return self.king2
         else:
             raise ValueError("Player can be either 1 or 2")
 
@@ -85,10 +89,10 @@ class Board(object):  # Square objects are assigned a location on a
         [self.grid[7][column].setPiece(Bishop(2)) for column in [2, 5]]
         self.grid[0][3].setPiece(Queen(1))
         self.grid[7][3].setPiece(Queen(2))
-        self.grid[0][4].setPiece(self.King1)
-        self.King1.location = self.grid[0][4]
-        self.grid[7][4].setPiece(self.King2)
-        self.King2.location = self.grid[7][4]
+        self.grid[0][4].setPiece(self.king1)
+        self.king1.location = self.grid[0][4]
+        self.grid[7][4].setPiece(self.king2)
+        self.king2.location = self.grid[7][4]
 
     # Draw the board onto the screen with unicode ASCII characters (old school, yes)
     def draw(self, player: int):
@@ -222,12 +226,14 @@ class Board(object):  # Square objects are assigned a location on a
         else:
             raise ValueError("Need input of 1 or 2")
 
+    # See if a square is on the board before calling getSquare
+
     # Reference a particular square on the grid
     def getSquare(self, row: int, column: int) -> Square:
         if row in range(self.numRows) and column in range(self.numColumns):
             return self.grid[row][column]
         else:
-            return None    # raise ValueError("Please use 0-7 indices")
+            raise ValueError("Please use 0-7 indices")
 
     # Get all possible moves (even if capturing a piece)
     # For this to work, the piece is "walked" along the board until
@@ -254,10 +260,10 @@ class Board(object):  # Square objects are assigned a location on a
                         while True:
                             row = square.row + vector[0]
                             column = square.column + vector[1]
-                            square = self.getSquare(row, column)
-                            if square is None:  # Walk until hitting an edge
+                            if not isSquare(row, column):  # Walk until hitting an edge
                                 break
                             else:
+                                square = self.getSquare(row, column)
                                 if square.piece is None:
                                     moves = moves.union([square])
                                     if not start.piece.scalable:  # Stop if limited to move one square only
@@ -274,14 +280,13 @@ class Board(object):  # Square objects are assigned a location on a
     # As a result, they have their own method for movement
     def getPawnMoves(self, square: Square) -> frozenset:
         moves = frozenset()
-        if square is None:
-            return moves
         if square.piece is None:
             return moves
         if isinstance(square.piece, Pawn):
             row = square.row
             column = square.column
             player = square.piece.player
+            square.piece.enPassant = False  # reset this flag: good for only one move
 
             # Work with both sides, which have opposing directions
             if player == 1:
@@ -289,41 +294,44 @@ class Board(object):  # Square objects are assigned a location on a
             else:
                 direction = -1
 
-            # Portray a typical move one square forward movement
-            forward = self.getSquare(row + 1 * direction, column)
-            if forward.piece is None:
-                moves = moves.union([forward])
+            # Check to see if the diagonal moves contain an opposing piece and add
+            if isSquare(row + direction, column + 1):
+                east = self.getSquare(row + direction, column + 1)
+                if east.piece is not None and east.piece.player == opponent(player):
+                    moves = moves.union([east])
+            if isSquare(row + direction, column - 1):
+                west = self.getSquare(row + direction, column - 1)
+                if west.piece is not None and west.piece.player == opponent(player):
+                    moves = moves.union([west])
 
-            # Include the moves for capturing pieces at an angle, dubbed east and west here
-            east = self.getSquare(row + 1 * direction, column + 1)
-            west = self.getSquare(row + 1 * direction, column - 1)
-            threat = False  # "Threat" implies that there are pieces in those slots
+            # Check for forward one square and two square movements
+            if isSquare(row + direction, column):
+                forward = self.getSquare(row + direction, column)
+                if forward.piece is None:
+                    moves = moves.union([forward])
+                    if isSquare(row + 2 * direction, column) and not square.piece.moved:
+                        forwardTwo = self.getSquare(row + 2 * direction, column)
+                        if forwardTwo.piece is None:
+                            moves = moves.union([forwardTwo])
 
-            # Add the move ONLY if there is an opposing player's piece in those diagonal slots
-            if east is not None:
-                if east.piece is not None:
-                    if east.piece.player == opponent(player):
-                        moves = moves.union([east])
-                        threat = True
+            # "En Passant" check: allows pawns the opportunity to take an enemy pawn
+            # that bypassed them by moving two squares ahead
+            if isSquare(row, column + 1):
+                checkSquare = self.getSquare(row, column + 1)
+                if isinstance(checkSquare.piece, Pawn) and \
+                        checkSquare.piece.player == opponent(player) and \
+                        checkSquare.piece.enPassant:
+                    moves = moves.union([self.getSquare(row + direction, column + 1)])
 
-            # For both sides...
-            if west is not None:
-                if west.piece is not None:
-                    if west.piece.player == opponent(player):
-                        moves = moves.union([west])
-                        threat = True
+            # ...on both sides
+            if isSquare(row, column - 1):
+                checkSquare = self.getSquare(row, column - 1)
+                if isinstance(checkSquare.piece, Pawn) and \
+                        checkSquare.piece.player == opponent(player) and \
+                        checkSquare.piece.enPassant:
+                    moves = moves.union([self.getSquare(row + direction, column - 1)])
 
-            # At this point, we must evaluate whether the two square forward move is eligible
-            # (must be first move and not bypass any of the opposing player's pieces
-            if threat or square.piece.moved or forward.piece is not None:
-                return moves
-            else:
-                forwardTwo = self.getSquare(row + 2 * direction, column)
-                if forwardTwo is not None:
-                    if forwardTwo.piece is None:
-                        moves = moves.union([forwardTwo])
-                        return moves
-                return moves
+            return moves
         else:
             raise ValueError("Square does not contain a pawn")
 
@@ -332,31 +340,32 @@ class Board(object):  # Square objects are assigned a location on a
     # This method adds those moves only if they are eligible (not in check, path clear, etc)
     def getKingMoves(self, player: int) -> frozenset:
         moves = frozenset()
+        checkZone = self.checkZone(opponent(player))  # Saves some processing to grab this
         king = self.getKing(player)
         if king.moved:
-            return frozenset()
+            return moves
+        if king.location in checkZone:
+            return moves
         row = king.location.row
         kingColumn = king.location.column
-        rookColumn = 7
-        firstMove = self.getSquare(row, kingColumn + 1)
-        secondMove = self.getSquare(row, kingColumn + 2)
-        rookSquare = self.getSquare(row, rookColumn)
-        if rookSquare is not None and rookSquare.piece is not None and \
-                isinstance(rookSquare.piece, Rook) and not rookSquare.piece.moved and \
-                firstMove is not None and firstMove.piece is None and \
-                secondMove is not None or secondMove.piece is None:
-            moves = moves.union([secondMove])
         rookColumn = 0
-        firstMove = self.getSquare(row, kingColumn - 1)
-        secondMove = self.getSquare(row, kingColumn - 2)
-        thirdMove = self.getSquare(row, kingColumn - 3)
         rookSquare = self.getSquare(row, rookColumn)
-        if rookSquare is not None and rookSquare.piece is not None and \
-                isinstance(rookSquare.piece, Rook) and not rookSquare.piece.moved and \
-                firstMove is not None and firstMove.piece is None and \
-                secondMove is not None or secondMove.piece is None and \
-                thirdMove is not None and thirdMove.piece is None:
-            moves = moves.union([secondMove])
+        if isinstance(rookSquare.piece, Rook) and not rookSquare.piece.moved:
+            kingMove1 = self.getSquare(row, kingColumn - 1)
+            kingMove2 = self.getSquare(row, kingColumn - 2)
+            if kingMove1.piece is None and kingMove2.piece is None and \
+                    kingMove1 not in checkZone and \
+                    kingMove2 not in checkZone:
+                moves = moves.union([kingMove2])
+        rookColumn = 7
+        rookSquare = self.getSquare(row, rookColumn)
+        if isinstance(rookSquare.piece, Rook) and not rookSquare.piece.moved:
+            kingMove1 = self.getSquare(row, kingColumn + 1)
+            kingMove2 = self.getSquare(row, kingColumn + 2)
+            if kingMove1.piece is None and kingMove2.piece is None and \
+                    kingMove1 not in checkZone and \
+                    kingMove2 not in checkZone:
+                moves = moves.union([kingMove2])
         return moves
 
     # Combines all possible moves from one player to see where
@@ -370,23 +379,23 @@ class Board(object):  # Square objects are assigned a location on a
                         # Again, pawns are unique in their movements, so they are added separately
                         if isinstance(checkSquare.piece, Pawn):
                             if aggressor == 1:
-                                eastSquare = self.getSquare(
-                                    checkSquare.row + 1,
-                                    checkSquare.column + 1)
-                                westSquare = self.getSquare(
-                                    checkSquare.row + 1,
-                                    checkSquare.column - 1)
+                                if isSquare(checkSquare.row + 1, checkSquare.column + 1):
+                                    checkZone = checkZone.union([self.getSquare(
+                                        checkSquare.row + 1,
+                                        checkSquare.column + 1)])
+                                if isSquare(checkSquare.row + 1, checkSquare.column - 1):
+                                    checkZone = checkZone.union([self.getSquare(
+                                        checkSquare.row + 1,
+                                        checkSquare.column - 1)])
                             else:
-                                eastSquare = self.getSquare(
-                                    checkSquare.row - 1,
-                                    checkSquare.column + 1)
-                                westSquare = self.getSquare(
-                                    checkSquare.row - 1,
-                                    checkSquare.column - 1)
-                            if eastSquare is not None:
-                                checkZone = checkZone.union([eastSquare])
-                            if westSquare is not None:
-                                checkZone = checkZone.union([westSquare])
+                                if isSquare(checkSquare.row - 1, checkSquare.column + 1):
+                                    checkZone = checkZone.union([self.getSquare(
+                                        checkSquare.row - 1,
+                                        checkSquare.column + 1)])
+                                if isSquare(checkSquare.row - 1, checkSquare.column - 1):
+                                    checkZone = checkZone.union([self.getSquare(
+                                        checkSquare.row - 1,
+                                        checkSquare.column - 1)])
                         else:
                             checkZone = checkZone.union(
                                 self.getMoves(checkSquare))

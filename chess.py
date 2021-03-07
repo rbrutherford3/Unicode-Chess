@@ -25,8 +25,17 @@ def clear():
         _ = system("clear")
 
 
+def isCode(code: str):
+    if len(code) == 2:
+        char1: str = code[0]
+        char2: str = code[1]
+        if "a" <= char1.lower() <= "h" and "1" <= char2 <= "8":
+            return True
+    return False
+
+
 # Converts user shorthand for squares into row and column tuple for use in program
-def decode(code: str):  # -> Optional[tuple[int, int]]:
+def deCode(code: str) -> [int, int]:
     letters: list[str] = ["a", "b", "c", "d", "e", "f", "g", "h"]
     if len(code) == 2:
         char1: str = code[0]
@@ -36,15 +45,34 @@ def decode(code: str):  # -> Optional[tuple[int, int]]:
             rowNum: int = int(char2) - 1
             return rowNum, column
         else:
-            return None
+            raise ValueError("Location code must contain a upper or lowercase letter " +
+                             "from \"a\" to \"h\" first, and a number 1-8 second")
     else:
-        return None
+        raise ValueError("Location code must be two characters")
 
 
-[network, onlineGame, player] = accessNetwork()
+# Check if this will be a local game (1 and 2 player at same terminal)
+# or a remote game over the internet
+print("Connect to remote computer? (Y/n)")
+while True:
+    onlineGame = input(">").lower()
+    if onlineGame == "y":
+        onlineGame = True
+        break
+    elif onlineGame == "n":
+        onlineGame = False
+        break
+    else:
+        print("Please enter either \"y\" or \"n\"")
+
+if onlineGame:
+    [network, player] = accessNetwork()
+else:
+    network = None
+    player = None
 
 # Because this is over a connection and two instances of this program
-# will be running, it is important to establish between the two whose turn it is
+# will be running, it is important to establish whose turn it is
 currentPlayer = 1
 currentOtherPlayer = 2
 
@@ -100,15 +128,14 @@ while gameOn:
                 print("Player #", currentPlayer)
                 print("Select piece")
                 startCode = input(">")
-                startLocation = decode(startCode)
-                if startLocation is None:
+                if not isCode(startCode):
                     print("Please type column letter then row number")
                 else:
-                    startSquare = board.getSquare(startLocation[0],
-                                                  startLocation[1])
-                    if startSquare is None:
+                    startLocation = deCode(startCode)
+                    if not isSquare(startLocation[0], startLocation[1]):
                         print("Please choose a square on the board")
                     else:
+                        startSquare = board.getSquare(startLocation[0], startLocation[1])
                         if startSquare.piece is None:
                             print("Please choose a square with a piece on it")
                         else:
@@ -127,21 +154,20 @@ while gameOn:
                 moves = board.getMoves(startSquare)
             print("Select move")
             endCode = input(">")
-            endLocation = decode(endCode)
-            if endLocation is None:
+            if not isCode(endCode):
                 print("Please type column letter then row number")
             else:
-                endSquare = board.getSquare(endLocation[0], endLocation[1])
-                if endSquare is None:
+                endLocation = deCode(endCode)
+                if not isSquare(endLocation[0], endLocation[1]):
                     print("Please choose a square on the board")
                 else:
+                    endSquare = board.getSquare(endLocation[0], endLocation[1])
                     if moves == frozenset():  # this line doesn't seem to work well
                         print(
                             "No moves available for this piece, please try again")
                     else:
                         if endSquare in moves:
                             # ToDo: need logic for check situations
-                            # if castling...
                             if isinstance(startSquare.piece, King) and \
                                     abs(endSquare.column - startSquare.column) == 2:
                                 endSquare.piece = startSquare.piece
@@ -154,14 +180,36 @@ while gameOn:
                                 else:
                                     rookColumn = 7
                                     rookColumnMove = -2
-                                rookStartSquare = board.getSquare(
-                                    row, rookColumn)
-                                rookEndSquare = board.getSquare(
-                                    row, rookColumn + rookColumnMove)
+                                rookStartSquare = board.getSquare(row, rookColumn)
+                                rookEndSquare = board.getSquare(row, rookColumn + rookColumnMove)
                                 rookEndSquare.piece = rookStartSquare.piece
                                 rookStartSquare.piece = None
                                 rookEndSquare.piece.moved = True
                                 king.moved = True
+                                break
+
+                            elif isinstance(startSquare.piece, Pawn) and \
+                                    abs(endSquare.row - startSquare.row) == 2:
+                                startSquare.piece.enPassant = True
+                                endSquare.piece = startSquare.piece
+                                startSquare.piece = None
+                                break
+
+                            elif isinstance(startSquare.piece, Pawn) \
+                                    and endSquare.column != startSquare.column and \
+                                    endSquare.piece is None:
+                                enPassant = board.getSquare(startSquare.row, endSquare.column)
+                                if enPassant.piece is not None and \
+                                        isinstance(enPassant.piece, Pawn) and \
+                                        enPassant.piece.player == opponent(currentPlayer) and \
+                                        enPassant.piece.enPassant:
+                                    endSquare.piece = startSquare.piece
+                                    startSquare.piece = None
+                                    enPassant.piece = None
+                                    print("En passant!")
+                                else:
+                                    raise ValueError("Move is not a legal enPassant move")
+                                break
 
                             # If pawn reaches other side, it is promoted to a better piece...
                             elif isinstance(startSquare.piece, Pawn) and (
@@ -191,15 +239,10 @@ while gameOn:
                                         elif promotion == 4:
                                             endSquare.piece = Rook(
                                                 currentPlayer)
-                                        else:
-                                            promotion = None
-                                    else:
-                                        promotion = None
-                                    if promotion is None:
-                                        print(
-                                            "Invalid selection, please try again")
-                                    else:
                                         break
+                                    else:
+                                        print("Invalid selection, please try again")
+                                break
 
                             # "Move" code for the rest of the pieces and the normal king moves, too
                             else:
@@ -224,6 +267,7 @@ while gameOn:
                                     # moves require that no previous moves have been made
                                     endSquare.piece.moved = True
                                     break
+                            # if castling...
                         else:
                             print("Illegal move, please try again")
 
@@ -258,9 +302,9 @@ while gameOn:
         firstMove = False
         print("Wait for opponent to finish their move...")
         theirMove = network.receive()
-        startLocation = decode(theirMove[0:2])
+        startLocation = deCode(theirMove[0:2])
         startSquare = board.getSquare(startLocation[0], startLocation[1])
-        endLocation = decode(theirMove[2:4])
+        endLocation = deCode(theirMove[2:4])
         endSquare = board.getSquare(endLocation[0], endLocation[1])
         endSquare.piece = startSquare.piece
         startSquare.piece = None
