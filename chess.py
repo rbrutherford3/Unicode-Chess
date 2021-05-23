@@ -65,8 +65,10 @@ while True:
     else:
         print("Please enter either \"y\" or \"n\"")
 
+lastId = 0  # moving this variable to suppress a warning
 if onlineGame:
-    [network, player] = accessNetwork()
+    network = Network()
+    player = network.newGame()
 else:
     network = None
     player = None
@@ -80,7 +82,6 @@ currentOtherPlayer = 2
 board = Board()
 board.setup()
 gameOn = True
-firstMove = onlineGame  # only need this if playing remotely to sync players
 
 # Keep looping through turns until the game ends
 while gameOn:
@@ -93,7 +94,7 @@ while gameOn:
         board.draw(currentPlayer)
 
     # Begin processing moves!
-    if not onlineGame or (onlineGame and currentPlayer == player):
+    if not onlineGame or (onlineGame and (currentPlayer == player)):
 
         # Check to see if there was a game ending situation for defender
         inCheck = False
@@ -111,8 +112,6 @@ while gameOn:
 
         # ToDo: consider deleting this and tracing route for losing player
         if not gameOn:
-            if onlineGame:
-                network.quit()
             break
 
         # ToDo: re-indent?
@@ -272,7 +271,7 @@ while gameOn:
                             print("Illegal move, please try again")
 
         if onlineGame:  # ToDo: reconsider position for this
-            network.send(startCode + endCode)
+            lastId = int(network.sendMove(startSquare.row, startSquare.column, endSquare.row, endSquare.column))
 
     # Re-draw board: after (i.e.: before and after)
     clear()
@@ -298,14 +297,18 @@ while gameOn:
         input("<PRESS ENTER TO CONTINUE>")
 
     # Employ move that is transmitted from opponent
-    if onlineGame and gameOn and (currentPlayer == player or firstMove):
-        firstMove = False
+    if onlineGame and gameOn and (currentOtherPlayer == player):
         print("Wait for opponent to finish their move...")
-        theirMove = network.receive()
-        startLocation = deCode(theirMove[0:2])
-        startSquare = board.getSquare(startLocation[0], startLocation[1])
-        endLocation = deCode(theirMove[2:4])
-        endSquare = board.getSquare(endLocation[0], endLocation[1])
+        theirMove = network.receiveMove(lastId)
+        if int(theirMove[0]) == player:
+            raise Exception('Incorrect player number received online')
+        else:
+            row1 = int(theirMove[1])
+            col1 = int(theirMove[2])
+            row2 = int(theirMove[3])
+            col2 = int(theirMove[4])
+        startSquare = board.getSquare(row1, col1)
+        endSquare = board.getSquare(row2, col2)
         endSquare.piece = startSquare.piece
         startSquare.piece = None
         # if castling...
