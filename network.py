@@ -10,7 +10,7 @@ import urllib3
 # Class used to communicate with a remote player
 class Network:
     http: urllib3
-    host: str = 'http://www.example.com/'
+    host: str = 'spiffindustries.com/chess'
     filename: str = 'chess_move.php'
     url: str
     player: int
@@ -36,6 +36,17 @@ class Network:
         else:
             raise Exception('Initiating new game failed')
         return self.player
+
+    def readyToStart(self):
+        print('Waiting for opponent to join...')
+        while True:
+            r = self.http.request('GET', self.url + '?readyToStart')
+            msg = r.data.decode("utf-8")
+            if msg == 'WAIT':
+                sleep(1)
+            else:
+                break
+        return True
 
     # Transmit last move to remote player
     def sendMove(self, row1: int, col1: int, row2: int, col2: int) -> str:

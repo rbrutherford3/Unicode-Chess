@@ -6,34 +6,42 @@ error_reporting(E_ALL);
 
 // Assign sides randomly using empty files to track assignments
 if (isset($_GET['newGame'])) {
-	if (!file_exists('newgame')) {
-		touch('newgame');
-	}
-	if (!file_exists('black') && !file_exists('white')) {
+	if (!file_exists('black') && !file_exists('white') && !file_exists('whitenotmovedyet') && !file_exists('blacknotmovedyet')) {
 		touch('black');
 		touch('white');
 		if (round(rand(0, 1))) {
 			unlink('white');
+			touch('whitenotmovedyet');
 			echo 'white';
 		}
 		else {
 			unlink('black');
+			touch('blacknotmovedyet');
 			echo 'black';
 		}
 	}
 	elseif (file_exists('black') && !file_exists('white')) {
 		unlink('black');
+		touch('blacknotmovedyet');
 		echo 'black';
 	}
 	elseif (!file_exists('black') && file_exists('white')) {
 		unlink('white');
+		touch('whitenotmovedyet');
 		echo 'white';
 	}
 	else {
 		throw Exception('Both white and black files present on server');
 	}
 }
-
+elseif (isset($_GET['readyToStart'])) {
+    if (file_exists('white') || file_exists('black')) {
+        echo 'WAIT';
+    }
+    else {
+        echo 'GO';
+    }
+}
 // Decide whether to transmit or receive based on what information was passed
 else {
 	if (isset($_GET['id'])) {
@@ -86,6 +94,7 @@ function highestId($pdo) {
 
 // Receive a move from a remote player to store in the database
 function receiveMove(int $player, int $row1, int $col1, int $row2, int $col2) {
+
 	$pdo = connect();
 	$sql = "insert into chess.moves (player, row1, col1, row2, col2) values (:player, :row1, :col1, :row2, :col2);";
 	$stmt = $pdo->prepare($sql);
@@ -95,9 +104,12 @@ function receiveMove(int $player, int $row1, int $col1, int $row2, int $col2) {
 	$stmt->bindValue(':row2', $row2);
 	$stmt->bindValue(':col2', $col2);
 	if ($stmt->execute()) {
-		if (file_exists('newgame')) {
-			unlink('newgame');
-		}
+	    if (($player == 1) && file_exists('whitenotmovedyet')) {
+	        unlink('whitenotmovedyet');
+	    }
+	    if (($player == 2) && file_exists('blacknotmovedyet')) {
+	        unlink('blacknotmovedyet');
+	    }
 		echo $pdo->lastInsertId('id');
 		return true;
 	}
@@ -110,7 +122,7 @@ function receiveMove(int $player, int $row1, int $col1, int $row2, int $col2) {
 function sendMove(int $id) {
 	$pdo = connect();
 	$maxId = highestId($pdo);
-	if ((($maxId > $id) && ($id > 0)) || (($id == 0) && (!file_exists('newgame')))) {
+	if ((($maxId > $id) && ($id > 0)) || (($id == 0) && !file_exists('whitenotmovedyet'))) {
 		$sql = "select player, row1, col1, row2, col2 from chess.moves where id=:maxId;";
 		$stmt = $pdo->prepare($sql);
 		$stmt->bindValue(':maxId', $maxId);
@@ -123,7 +135,7 @@ function sendMove(int $id) {
 		echo $row['col2'];
 		return true;
 	}
-	elseif (($maxId == $id) || (($id == 0) && (file_exists('newgame')))) {
+	elseif (($maxId == $id) || (($id == 0) && (file_exists('whitenotmovedyet')))) {
 		echo 'WAIT';
 		return true;
 	}

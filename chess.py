@@ -69,6 +69,7 @@ lastId = 0  # moving this variable to suppress a warning
 if onlineGame:
     network = Network()
     player = network.newGame()
+    network.readyToStart()
 else:
     network = None
     player = None
