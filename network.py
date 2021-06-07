@@ -10,8 +10,8 @@ import urllib3
 # Class used to communicate with a remote player
 class Network:
     http: urllib3
-    host: str = 'spiffindustries.com/chess'
-    filename: str = 'chess_move.php'
+    host: str = 'chess.spiffindustries.com'
+    filename: str = ''
     url: str
     player: int
     msg: str

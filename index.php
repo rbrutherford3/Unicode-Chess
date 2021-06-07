@@ -63,7 +63,7 @@ else {
 
 // Create PDO object for database connection
 function connect() {
-	$host = 'localhost';
+	$host = '127.0.0.1';
 	$db   = 'chess';
 	$user = 'chessplayer';
 	$pass = 'time4chess!';
