@@ -7,3 +7,6 @@ retired/
 dist/
 build/
 *.spec
+white*
+black*
+games/

@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 #################################################################
 #                                                               #
 #       ASCII-Chess, written by Robert Rutherford in 2021       #

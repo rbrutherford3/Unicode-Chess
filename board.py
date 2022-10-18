@@ -1,12 +1,13 @@
+#!/usr/bin/python3
+
 #################################################################
 #                                                               #
 #       ASCII-Chess, written by Robert Rutherford in 2021       #
 #                                                               #
 #################################################################
 
-
-from piece import *
-
+from piece import Piece, King, Queen, Pawn, Bishop, Knight, Rook
+import json
 
 # Yield the opposite player
 def opponent(player):
@@ -34,18 +35,32 @@ class Square(object):
     # Over-riding 'to string' function for displaying on board
     def __str__(self):
         if self.piece is None:
-            return "---"
+            if ((self.row + self.column) % 2 == 0):
+                return "///"
+            else:
+                return "   "
         else:
-            return str(self.piece.player) + "_" + self.piece.symbol
+            if ((self.row + self.column) % 2 == 0):
+                return str(self.piece.player) + "/" + self.piece.symbol
+            else:
+                return str(self.piece.player) + " " + self.piece.symbol
 
     # Add a piece after instantiation
     def setPiece(self, piece: Piece):
         self.piece = piece
 
+    # Yield the opposite player
+    def opponent(player: int) -> int:
+        if player == 1:
+            return 2
+        elif player == 2:
+            return 1
+        else:
+            raise ValueError("Players are either 1 or 2")
 
-# Board class, which holds most functioning and is composed of 64 square objects
-def isSquare(row: int, column: int) -> bool:
-    return 0 <= row <= 7 and 0 <= column <= 7
+    # Board class, which holds most functioning and is composed of 64 square objects
+    def isSquare(row: int, column: int) -> bool:
+        return 0 <= row <= 7 and 0 <= column <= 7
 
 
 class Board(object):  # Square objects are assigned a location on a
@@ -95,134 +110,118 @@ class Board(object):  # Square objects are assigned a location on a
         self.king2.location = self.grid[7][4]
 
     # Draw the board onto the screen with unicode ASCII characters (old school, yes)
-    def draw(self, player: int):
+    def draw(self, player: int) -> str:
 
         if player == 1:
-            print("")
-            print("        a       b       c       d       e       f       g       h")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 8  |  " + str(self.grid[7][0]) + "  |//" + str(self.grid[7][1]) +
-                  "//|  " + str(self.grid[7][2]) + "  |//" + str(self.grid[7][3]) +
-                  "//|  " + str(self.grid[7][4]) + "  |//" + str(self.grid[7][5]) +
-                  "//|  " + str(self.grid[7][6]) + "  |//" + str(self.grid[7][7]) + "//|  8")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 7  |//" + str(self.grid[6][0]) + "//|  " + str(self.grid[6][1]) +
-                  "  |//" + str(self.grid[6][2]) + "//|  " + str(self.grid[6][3]) +
-                  "  |//" + str(self.grid[6][4]) + "//|  " + str(self.grid[6][5]) +
-                  "  |//" + str(self.grid[6][6]) + "//|  " + str(self.grid[6][7]) + "  |  7")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 6  |  " + str(self.grid[5][0]) + "  |//" + str(self.grid[5][1]) +
-                  "//|  " + str(self.grid[5][2]) + "  |//" + str(self.grid[5][3]) +
-                  "//|  " + str(self.grid[5][4]) + "  |//" + str(self.grid[5][5]) +
-                  "//|  " + str(self.grid[5][6]) + "  |//" + str(self.grid[5][7]) + "//|  6")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 5  |//" + str(self.grid[4][0]) + "//|  " + str(self.grid[4][1]) +
-                  "  |//" + str(self.grid[4][2]) + "//|  " + str(self.grid[4][3]) +
-                  "  |//" + str(self.grid[4][4]) + "//|  " + str(self.grid[4][5]) +
-                  "  |//" + str(self.grid[4][6]) + "//|  " + str(self.grid[4][7]) + "  |  5")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 4  |  " + str(self.grid[3][0]) + "  |//" + str(self.grid[3][1]) +
-                  "//|  " + str(self.grid[3][2]) + "  |//" + str(self.grid[3][3]) +
-                  "//|  " + str(self.grid[3][4]) + "  |//" + str(self.grid[3][5]) +
-                  "//|  " + str(self.grid[3][6]) + "  |//" + str(self.grid[3][7]) + "//|  4")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 3  |//" + str(self.grid[2][0]) + "//|  " + str(self.grid[2][1]) +
-                  "  |//" + str(self.grid[2][2]) + "//|  " + str(self.grid[2][3]) +
-                  "  |//" + str(self.grid[2][4]) + "//|  " + str(self.grid[2][5]) +
-                  "  |//" + str(self.grid[2][6]) + "//|  " + str(self.grid[2][7]) + "  |  3")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 2  |  " + str(self.grid[1][0]) + "  |//" + str(self.grid[1][1]) +
-                  "//|  " + str(self.grid[1][2]) + "  |//" + str(self.grid[1][3]) +
-                  "//|  " + str(self.grid[1][4]) + "  |//" + str(self.grid[1][5]) +
-                  "//|  " + str(self.grid[1][6]) + "  |//" + str(self.grid[1][7]) + "//|  2")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 1  |//" + str(self.grid[0][0]) + "//|  " + str(self.grid[0][1]) +
-                  "  |//" + str(self.grid[0][2]) + "//|  " + str(self.grid[0][3]) +
-                  "  |//" + str(self.grid[0][4]) + "//|  " + str(self.grid[0][5]) +
-                  "  |//" + str(self.grid[0][6]) + "//|  " + str(self.grid[0][7]) + "  |  1")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("        a       b       c       d       e       f       g       h")
-            print("")
+            return "<br>" + \
+"      a   b   c   d   e   f   g   h<br>" + \
+"    ┏━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┓<br>" + \
+"  8 ┃" + \
+str(self.grid[7][0]) + "┃" + str(self.grid[7][1]) + "┃" + \
+str(self.grid[7][2]) + "┃" + str(self.grid[7][3]) + "┃" + \
+str(self.grid[7][4]) + "┃" + str(self.grid[7][5]) + "┃" + \
+str(self.grid[7][6]) + "┃" + str(self.grid[7][7]) + "┃ 8<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  7 ┃" + \
+str(self.grid[6][0]) + "┃" + str(self.grid[6][1]) + "┃" + \
+str(self.grid[6][2]) + "┃" + str(self.grid[6][3]) + "┃" + \
+str(self.grid[6][4]) + "┃" + str(self.grid[6][5]) + "┃" + \
+str(self.grid[6][6]) + "┃" + str(self.grid[6][7]) + "┃ 7<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  6 ┃" + \
+str(self.grid[5][0]) + "┃" + str(self.grid[5][1]) + "┃" + \
+str(self.grid[5][2]) + "┃" + str(self.grid[5][3]) + "┃" + \
+str(self.grid[5][4]) + "┃" + str(self.grid[5][5]) + "┃" + \
+str(self.grid[5][6]) + "┃" + str(self.grid[5][7]) + "┃ 6<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  5 ┃" + \
+str(self.grid[4][0]) + "┃" + str(self.grid[4][1]) + "┃" + \
+str(self.grid[4][2]) + "┃" + str(self.grid[4][3]) + "┃" + \
+str(self.grid[4][4]) + "┃" + str(self.grid[4][5]) + "┃" + \
+str(self.grid[4][6]) + "┃" + str(self.grid[4][7]) + "┃ 5<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  4 ┃" + \
+str(self.grid[3][0]) + "┃" + str(self.grid[3][1]) + "┃" + \
+str(self.grid[3][2]) + "┃" + str(self.grid[3][3]) + "┃" + \
+str(self.grid[3][4]) + "┃" + str(self.grid[3][5]) + "┃" + \
+str(self.grid[3][6]) + "┃" + str(self.grid[3][7]) + "┃ 4<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  3 ┃" + \
+str(self.grid[2][0]) + "┃" + str(self.grid[2][1]) + "┃" + \
+str(self.grid[2][2]) + "┃" + str(self.grid[2][3]) + "┃" + \
+str(self.grid[2][4]) + "┃" + str(self.grid[2][5]) + "┃" + \
+str(self.grid[2][6]) + "┃" + str(self.grid[2][7]) + "┃ 3<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  2 ┃" + \
+str(self.grid[1][0]) + "┃" + str(self.grid[1][1]) + "┃" + \
+str(self.grid[1][2]) + "┃" + str(self.grid[1][3]) + "┃" + \
+str(self.grid[1][4]) + "┃" + str(self.grid[1][5]) + "┃" + \
+str(self.grid[1][6]) + "┃" + str(self.grid[1][7]) + "┃ 2<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  1 ┃" + \
+str(self.grid[0][0]) + "┃" + str(self.grid[0][1]) + "┃" + \
+str(self.grid[0][2]) + "┃" + str(self.grid[0][3]) + "┃" + \
+str(self.grid[0][4]) + "┃" + str(self.grid[0][5]) + "┃" + \
+str(self.grid[0][6]) + "┃" + str(self.grid[0][7]) + "┃ 1<br>" + \
+"    ┗━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┛<br>" + \
+"      a   b   c   d   e   f   g   h<br><br>"
+
 
         # Show board from the other side for player 2
         elif player == 2:
-            print("")
-            print("        h       g       f       e       d       c       b       a")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 1  |  " + str(self.grid[0][7]) + "  |//" + str(self.grid[0][6]) +
-                  "//|  " + str(self.grid[0][5]) + "  |//" + str(self.grid[0][4]) +
-                  "//|  " + str(self.grid[0][3]) + "  |//" + str(self.grid[0][2]) +
-                  "//|  " + str(self.grid[0][1]) + "  |//" + str(self.grid[0][0]) + "//|  1")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 2  |//" + str(self.grid[1][7]) + "//|  " + str(self.grid[1][6]) +
-                  "  |//" + str(self.grid[1][5]) + "//|  " + str(self.grid[1][4]) +
-                  "  |//" + str(self.grid[1][3]) + "//|  " + str(self.grid[1][2]) +
-                  "  |//" + str(self.grid[1][1]) + "//|  " + str(self.grid[1][0]) + "  |  2")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 3  |  " + str(self.grid[2][7]) + "  |//" + str(self.grid[2][6]) +
-                  "//|  " + str(self.grid[2][5]) + "  |//" + str(self.grid[2][4]) +
-                  "//|  " + str(self.grid[2][3]) + "  |//" + str(self.grid[2][2]) +
-                  "//|  " + str(self.grid[2][1]) + "  |//" + str(self.grid[2][0]) + "//|  3")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 4  |//" + str(self.grid[3][7]) + "//|  " + str(self.grid[3][6]) +
-                  "  |//" + str(self.grid[3][5]) + "//|  " + str(self.grid[3][4]) +
-                  "  |//" + str(self.grid[3][3]) + "//|  " + str(self.grid[3][2]) +
-                  "  |//" + str(self.grid[3][1]) + "//|  " + str(self.grid[3][0]) + "  |  4")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 5  |  " + str(self.grid[4][7]) + "  |//" + str(self.grid[4][6]) +
-                  "//|  " + str(self.grid[4][5]) + "  |//" + str(self.grid[4][4]) +
-                  "//|  " + str(self.grid[4][3]) + "  |//" + str(self.grid[4][2]) +
-                  "//|  " + str(self.grid[4][1]) + "  |//" + str(self.grid[4][0]) + "//|  5")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 6  |//" + str(self.grid[5][7]) + "//|  " + str(self.grid[5][6]) +
-                  "  |//" + str(self.grid[5][5]) + "//|  " + str(self.grid[5][4]) +
-                  "  |//" + str(self.grid[5][3]) + "//|  " + str(self.grid[5][2]) +
-                  "  |//" + str(self.grid[5][1]) + "//|  " + str(self.grid[5][0]) + "  |  6")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print(" 7  |  " + str(self.grid[6][7]) + "  |//" + str(self.grid[6][6]) +
-                  "//|  " + str(self.grid[6][5]) + "  |//" + str(self.grid[6][4]) +
-                  "//|  " + str(self.grid[6][3]) + "  |//" + str(self.grid[6][2]) +
-                  "//|  " + str(self.grid[6][1]) + "  |//" + str(self.grid[6][0]) + "//|  7")
-            print("    |       |///////|       |///////|       |///////|       |///////|")
-            print("    -----------------------------------------------------------------")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print(" 8  |//" + str(self.grid[7][7]) + "//|  " + str(self.grid[7][6]) +
-                  "  |//" + str(self.grid[7][5]) + "//|  " + str(self.grid[7][4]) +
-                  "  |//" + str(self.grid[7][3]) + "//|  " + str(self.grid[7][2]) +
-                  "  |//" + str(self.grid[7][1]) + "//|  " + str(self.grid[7][0]) + "  |  8")
-            print("    |///////|       |///////|       |///////|       |///////|       |")
-            print("    -----------------------------------------------------------------")
-            print("        h       g       f       e       d       c       b       a")
-            print("")
+            return "<br>" + \
+"      h   g   f   e   d   c   b   a<br>" + \
+"    ┏━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┓<br>" + \
+"  1 ┃" + \
+str(self.grid[0][7]) + "┃" + str(self.grid[0][6]) + "┃" + \
+str(self.grid[0][5]) + "┃" + str(self.grid[0][4]) + "┃" + \
+str(self.grid[0][3]) + "┃" + str(self.grid[0][2]) + "┃" + \
+str(self.grid[0][1]) + "┃" + str(self.grid[0][0]) + "┃ 1<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  2 ┃" + \
+str(self.grid[1][7]) + "┃" + str(self.grid[1][6]) + "┃" + \
+str(self.grid[1][5]) + "┃" + str(self.grid[1][4]) + "┃" + \
+str(self.grid[1][3]) + "┃" + str(self.grid[1][2]) + "┃" + \
+str(self.grid[1][1]) + "┃" + str(self.grid[1][0]) + "┃ 2<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  3 ┃" + \
+str(self.grid[2][7]) + "┃" + str(self.grid[2][6]) + "┃" + \
+str(self.grid[2][5]) + "┃" + str(self.grid[2][4]) + "┃" + \
+str(self.grid[2][3]) + "┃" + str(self.grid[2][2]) + "┃" + \
+str(self.grid[2][1]) + "┃" + str(self.grid[2][0]) + "┃ 3<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  4 ┃" + \
+str(self.grid[3][7]) + "┃" + str(self.grid[3][6]) + "┃" + \
+str(self.grid[3][5]) + "┃" + str(self.grid[3][4]) + "┃" + \
+str(self.grid[3][3]) + "┃" + str(self.grid[3][2]) + "┃" + \
+str(self.grid[3][1]) + "┃" + str(self.grid[3][0]) + "┃ 4<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  5 ┃" + \
+str(self.grid[4][7]) + "┃" + str(self.grid[4][6]) + "┃" + \
+str(self.grid[4][5]) + "┃" + str(self.grid[4][4]) + "┃" + \
+str(self.grid[4][3]) + "┃" + str(self.grid[4][2]) + "┃" + \
+str(self.grid[4][1]) + "┃" + str(self.grid[4][0]) + "┃ 5<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  6 ┃" + \
+str(self.grid[5][7]) + "┃" + str(self.grid[5][6]) + "┃" + \
+str(self.grid[5][5]) + "┃" + str(self.grid[5][4]) + "┃" + \
+str(self.grid[5][3]) + "┃" + str(self.grid[5][2]) + "┃" + \
+str(self.grid[5][1]) + "┃" + str(self.grid[5][0]) + "┃ 6<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  7 ┃" + \
+str(self.grid[6][7]) + "┃" + str(self.grid[6][6]) + "┃" + \
+str(self.grid[6][5]) + "┃" + str(self.grid[6][4]) + "┃" + \
+str(self.grid[6][3]) + "┃" + str(self.grid[6][2]) + "┃" + \
+str(self.grid[6][1]) + "┃" + str(self.grid[6][0]) + "┃ 7<br>" + \
+"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
+"  8 ┃" + \
+str(self.grid[7][7]) + "┃" + str(self.grid[7][6]) + "┃" + \
+str(self.grid[7][5]) + "┃" + str(self.grid[7][4]) + "┃" + \
+str(self.grid[7][3]) + "┃" + str(self.grid[7][2]) + "┃" + \
+str(self.grid[7][1]) + "┃" + str(self.grid[7][0]) + "┃ 8<br>" + \
+"    ┗━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┛<br>" + \
+"      h   g   f   e   d   c   b   a<br><br>"
+
         else:
             raise ValueError("Need input of 1 or 2")
 
@@ -260,7 +259,7 @@ class Board(object):  # Square objects are assigned a location on a
                         while True:
                             row = square.row + vector[0]
                             column = square.column + vector[1]
-                            if not isSquare(row, column):  # Walk until hitting an edge
+                            if not Square.isSquare(row, column):  # Walk until hitting an edge
                                 break
                             else:
                                 square = self.getSquare(row, column)
@@ -295,28 +294,28 @@ class Board(object):  # Square objects are assigned a location on a
                 direction = -1
 
             # Check to see if the diagonal moves contain an opposing piece and add
-            if isSquare(row + direction, column + 1):
+            if Square.isSquare(row + direction, column + 1):
                 east = self.getSquare(row + direction, column + 1)
                 if east.piece is not None and east.piece.player == opponent(player):
                     moves = moves.union([east])
-            if isSquare(row + direction, column - 1):
+            if Square.isSquare(row + direction, column - 1):
                 west = self.getSquare(row + direction, column - 1)
                 if west.piece is not None and west.piece.player == opponent(player):
                     moves = moves.union([west])
 
             # Check for forward one square and two square movements
-            if isSquare(row + direction, column):
+            if Square.isSquare(row + direction, column):
                 forward = self.getSquare(row + direction, column)
                 if forward.piece is None:
                     moves = moves.union([forward])
-                    if isSquare(row + 2 * direction, column) and not square.piece.moved:
+                    if Square.isSquare(row + 2 * direction, column) and not square.piece.moved:
                         forwardTwo = self.getSquare(row + 2 * direction, column)
                         if forwardTwo.piece is None:
                             moves = moves.union([forwardTwo])
 
             # "En Passant" check: allows pawns the opportunity to take an enemy pawn
             # that bypassed them by moving two squares ahead
-            if isSquare(row, column + 1):
+            if Square.isSquare(row, column + 1):
                 checkSquare = self.getSquare(row, column + 1)
                 if isinstance(checkSquare.piece, Pawn) and \
                         checkSquare.piece.player == opponent(player) and \
@@ -324,7 +323,7 @@ class Board(object):  # Square objects are assigned a location on a
                     moves = moves.union([self.getSquare(row + direction, column + 1)])
 
             # ...on both sides
-            if isSquare(row, column - 1):
+            if Square.isSquare(row, column - 1):
                 checkSquare = self.getSquare(row, column - 1)
                 if isinstance(checkSquare.piece, Pawn) and \
                         checkSquare.piece.player == opponent(player) and \
@@ -379,20 +378,20 @@ class Board(object):  # Square objects are assigned a location on a
                         # Again, pawns are unique in their movements, so they are added separately
                         if isinstance(checkSquare.piece, Pawn):
                             if aggressor == 1:
-                                if isSquare(checkSquare.row + 1, checkSquare.column + 1):
+                                if Square.isSquare(checkSquare.row + 1, checkSquare.column + 1):
                                     checkZone = checkZone.union([self.getSquare(
                                         checkSquare.row + 1,
                                         checkSquare.column + 1)])
-                                if isSquare(checkSquare.row + 1, checkSquare.column - 1):
+                                if Square.isSquare(checkSquare.row + 1, checkSquare.column - 1):
                                     checkZone = checkZone.union([self.getSquare(
                                         checkSquare.row + 1,
                                         checkSquare.column - 1)])
                             else:
-                                if isSquare(checkSquare.row - 1, checkSquare.column + 1):
+                                if Square.isSquare(checkSquare.row - 1, checkSquare.column + 1):
                                     checkZone = checkZone.union([self.getSquare(
                                         checkSquare.row - 1,
                                         checkSquare.column + 1)])
-                                if isSquare(checkSquare.row - 1, checkSquare.column - 1):
+                                if Square.isSquare(checkSquare.row - 1, checkSquare.column - 1):
                                     checkZone = checkZone.union([self.getSquare(
                                         checkSquare.row - 1,
                                         checkSquare.column - 1)])
@@ -460,3 +459,6 @@ class Board(object):  # Square objects are assigned a location on a
         if len(moves) == 0:
             stalemate = True
         return stalemate
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
