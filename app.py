@@ -16,7 +16,7 @@ app.config["DEBUG"] = False
 app.secret_key = "awf98gjhgb"
 
 # Route incoming http requests to the appropriate function
-@app.route("/", methods=["GET", "POST"])
+@app.route("/chess/", methods=["GET", "POST"])
 def gameplay():
 	if request:
 		if (request.method == "POST"):
