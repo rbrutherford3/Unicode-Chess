@@ -16,7 +16,7 @@ from hashlib import shake_128
 from chess import Chess
 from flask import request, url_for
 from board import Square
-
+from recaptchav3 import reCAPTCHAv3
 
 
 class Game(object):
@@ -158,6 +158,15 @@ class Game(object):
                     }}
                 }}
             </script>
+            <script src="https://www.google.com/recaptcha/api.js?render={reCAPTCHA_site_key}"></script>
+            <script>
+                grecaptcha.ready(function () {{
+                    grecaptcha.execute('{reCAPTCHA_site_key}', {{action: 'validate_captcha'}}).then(function (token) {{
+                        console.info("got token: " + token);
+                        document.getElementById('g-recaptcha-response').value = token;
+                    }});
+                }});
+            </script>
         </head>
         <body onload = "awaitingTurn();">
             <form id="move_form" method="post" action=".">
@@ -183,6 +192,8 @@ class Game(object):
                 autofocus/>
                 <label for="next_move_end">Select square to move to:</label>
                 <input type="text" id="next_move_end" name="next_move_end" style="margin: 10px;" {disabled_input1} />
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                <input type="hidden" name="action" value="validate_captcha">
                 <input type="submit" {disabled_submit} />
             </form>
        </body>
@@ -191,7 +202,7 @@ class Game(object):
                    pawn_label_hidden=pawn_label_hidden, pawn_dialog_hidden=pawn_dialog_hidden, promotion=promotion,
                    game_status=game_status, disabled_input1=disabled_input, disabled_input2=disabled_input,
                    disabled_submit=disabled_submit, favicon_code=url_for('static', filename='favicon.ico'),
-                   header_text=header_text)
+                   header_text=header_text, reCAPTCHA_site_key=reCAPTCHAv3.site_key)
 
 
 def save_game(game: Game):

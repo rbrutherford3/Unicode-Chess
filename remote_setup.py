@@ -11,6 +11,7 @@ from random import randint
 from os import system
 from hashlib import shake_128
 from game import Game, save_game, load_game
+from recaptchav3 import reCAPTCHAv3
 
 # Initiate the game between two people
 # (decide who is white or black, provide game and player codes)
@@ -110,6 +111,15 @@ def homeScreen():
                 return 0;
             }}
         </script>
+        <script src="https://www.google.com/recaptcha/api.js?render={reCAPTCHA_site_key}"></script>
+        <script>
+            grecaptcha.ready(function () {{
+                grecaptcha.execute('{reCAPTCHA_site_key}', {{action: 'validate_captcha'}}).then(function (token) {{
+                    console.info("got token: " + token);
+                    document.getElementById('g-recaptcha-response').value = token;
+                }});
+            }});
+        </script>
     </head>
     <body>
         <form name="game_setup" method="post">
@@ -132,9 +142,11 @@ def homeScreen():
                 <label for="player_choice_3" id="player_choice_3_label" onclick="showSubmit();" style="display: none;" />Random</label>
             </p>
             <p>
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                <input type="hidden" name="action" value="validate_captcha">
                 <input type="submit" id="submit" value="Submit" style="display: none;" />
             </p>
         </form>
     <body>
 </html>
-'''.format(favicon_code=url_for('static', filename='favicon.ico'))
+'''.format(favicon_code=url_for('static', filename='favicon.ico'), reCAPTCHA_site_key=reCAPTCHAv3.site_key)
