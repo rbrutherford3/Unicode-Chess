@@ -6,7 +6,8 @@
 #                                                               #
 #################################################################
 
-from piece import Piece, King, Queen, Pawn, Bishop, Knight, Rook
+from piecetypes import Piece
+from pieces import *
 import json
 
 # Yield the opposite player
@@ -41,9 +42,9 @@ class Square(object):
                 return "   "
         else:
             if ((self.row + self.column) % 2 == 0):
-                return str(self.piece.player) + "/" + self.piece.symbol
+                return "/" + self.piece.symbol + "/"
             else:
-                return str(self.piece.player) + " " + self.piece.symbol
+                return " " + self.piece.symbol + " "
 
     # Add a piece after instantiation
     def setPiece(self, piece: Piece):
@@ -77,8 +78,8 @@ class Board(object):  # Square objects are assigned a location on a
             for gridColumn in range(self.numColumns)
         ] for gridRow in range(self.numRows)]
 
-        self.king1 = King(1)
-        self.king2 = King(2)
+        self.king1 = WhiteKing()
+        self.king2 = BlackKing()
 
     # Need quick access to the king for each side to speed up program
     def getKing(self, player) -> King:
@@ -92,18 +93,18 @@ class Board(object):  # Square objects are assigned a location on a
     # This method sets up each individual piece on the 'grid'
     def setup(self):
 
-        [self.grid[1][column].setPiece(Pawn(1))
+        [self.grid[1][column].setPiece(WhitePawn())
          for column in range(self.numColumns)]
-        [self.grid[6][column].setPiece(Pawn(2))
+        [self.grid[6][column].setPiece(BlackPawn())
          for column in range(self.numColumns)]
-        [self.grid[0][column].setPiece(Rook(1)) for column in [0, 7]]
-        [self.grid[7][column].setPiece(Rook(2)) for column in [0, 7]]
-        [self.grid[0][column].setPiece(Knight(1)) for column in [1, 6]]
-        [self.grid[7][column].setPiece(Knight(2)) for column in [1, 6]]
-        [self.grid[0][column].setPiece(Bishop(1)) for column in [2, 5]]
-        [self.grid[7][column].setPiece(Bishop(2)) for column in [2, 5]]
-        self.grid[0][3].setPiece(Queen(1))
-        self.grid[7][3].setPiece(Queen(2))
+        [self.grid[0][column].setPiece(WhiteRook()) for column in [0, 7]]
+        [self.grid[7][column].setPiece(BlackRook()) for column in [0, 7]]
+        [self.grid[0][column].setPiece(WhiteKnight()) for column in [1, 6]]
+        [self.grid[7][column].setPiece(BlackKnight()) for column in [1, 6]]
+        [self.grid[0][column].setPiece(WhiteBishop()) for column in [2, 5]]
+        [self.grid[7][column].setPiece(BlackBishop()) for column in [2, 5]]
+        self.grid[0][3].setPiece(WhiteQueen())
+        self.grid[7][3].setPiece(BlackQueen())
         self.grid[0][4].setPiece(self.king1)
         self.king1.location = self.grid[0][4]
         self.grid[7][4].setPiece(self.king2)

@@ -11,7 +11,7 @@
 # ToDo: comments, functions, possibly add a class or two (TDB)
 
 from board import Board, Square
-from piece import King, Queen, Bishop, Knight, Rook, Pawn
+from piecetypes import King, Queen, Bishop, Knight, Rook, Pawn
 
 # Determine whether the string is a code for a square on the board
 def isCode(code: str):

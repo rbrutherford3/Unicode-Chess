@@ -12,6 +12,8 @@ from abc import ABC
 
 # Abstract class to model chess pieces by providing necessary attributes
 class Piece(ABC):
+    piecetype: ABC
+    player: int # side (white = 1, black = 2)
     name: str  # name of piece, i.e.: 'king'
     symbol: str  # shorthand of piece for display on board
     value: int  # algebraic value (not used)
