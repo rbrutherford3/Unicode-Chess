@@ -2,7 +2,7 @@
 
 #################################################################
 #                                                               #
-#       ASCII-Chess, written by Robert Rutherford in 2021       #
+#      Unicode Chess, written by Robert Rutherford in 2021      #
 #                                                               #
 #################################################################
 
@@ -142,6 +142,12 @@ class Game(object):
                 label, h3 {{ font-weight: bold; }}
                 .error {{ color: red; }}
                 .gameStatus {{ color: green; }}
+                .white {{ display: inline-block; width: 25px; height: 25px; line-height: 25px; text-align: center; font-size: 20px; background-color: white; }}
+                .black {{ display: inline-block; width: 25px; height: 25px; line-height: 25px; text-align: center; font-size: 20px; background-color: darkgray; }}
+                .toplabel {{ border-bottom: 1px solid black; }}
+                .bottomlabel {{ border-top: 1px solid black; }}
+                .leftlabel {{ border-right: 1px solid black; }}
+                .rightlabel {{ border-left: 1px solid black; }}
             </style>
             <script>
                 function sleep(ms) {{

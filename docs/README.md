@@ -1,7 +1,7 @@
-# ASCII Chess
+# Unicode Chess
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-This is a **Python** chess game run using [**Flask**](https://flask.palletsprojects.com/en/2.2.x/) that allows two people to play a game across the internet on their own respective browsers.  It is called "ASCII Chess" because the board and pieces are drawn with monospace ASCII characters.
+This is a **Python** chess game run using [**Flask**](https://flask.palletsprojects.com/en/2.2.x/) that allows two people to play a game across the internet on their own respective browsers.  It is called "Unicode Chess" because the pieces are unicode chess characters.  Unicode characters replaced the ASCII characters of earlier versions of the game that were called "ASCII Chess."
 
 ![screenshot](screenshot.png)
 
@@ -29,7 +29,7 @@ This game originated as a simple **Python** program.  Communication capabilities
 If you wish to provide this product on your own server, you must clone it:
 
 ```
-git clone https://github.com/rbrutherford3/ASCII-Chess.git /path/to/site/root
+git clone https://github.com/rbrutherford3/Unicode-Chess.git /path/to/site/root
 ```
 To install **Flask**, follow the instructions found [here](https://flask.palletsprojects.com/en/2.2.x/installation/).  Then go to your directory and run the app:
 ```

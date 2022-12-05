@@ -2,7 +2,7 @@
 
 #################################################################
 #                                                               #
-#       ASCII-Chess, written by Robert Rutherford in 2022       #
+#      Unicode Chess, written by Robert Rutherford in 2021      #
 #                                                               #
 #################################################################
 

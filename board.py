@@ -2,7 +2,7 @@
 
 #################################################################
 #                                                               #
-#       ASCII-Chess, written by Robert Rutherford in 2021       #
+#      Unicode Chess, written by Robert Rutherford in 2021      #
 #                                                               #
 #################################################################
 
@@ -37,14 +37,14 @@ class Square(object):
     def __str__(self):
         if self.piece is None:
             if ((self.row + self.column) % 2 == 0):
-                return "///"
+                return "<div class=\"black\">&nbsp;</div>"
             else:
-                return "   "
+                return "<div class=\"white\">&nbsp;</div>"
         else:
             if ((self.row + self.column) % 2 == 0):
-                return "/" + self.piece.symbol + "/"
+                return "<div class=\"black\">" + self.piece.symbol + "</div>"
             else:
-                return " " + self.piece.symbol + " "
+                return "<div class=\"white\">" + self.piece.symbol + "</div>"
 
     # Add a piece after instantiation
     def setPiece(self, piece: Piece):
@@ -115,113 +115,143 @@ class Board(object):  # Square objects are assigned a location on a
 
         if player == 1:
             return "<br>" + \
-"      a   b   c   d   e   f   g   h<br>" + \
-"    ┏━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┓<br>" + \
-"  8 ┃" + \
-str(self.grid[7][0]) + "┃" + str(self.grid[7][1]) + "┃" + \
-str(self.grid[7][2]) + "┃" + str(self.grid[7][3]) + "┃" + \
-str(self.grid[7][4]) + "┃" + str(self.grid[7][5]) + "┃" + \
-str(self.grid[7][6]) + "┃" + str(self.grid[7][7]) + "┃ 8<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  7 ┃" + \
-str(self.grid[6][0]) + "┃" + str(self.grid[6][1]) + "┃" + \
-str(self.grid[6][2]) + "┃" + str(self.grid[6][3]) + "┃" + \
-str(self.grid[6][4]) + "┃" + str(self.grid[6][5]) + "┃" + \
-str(self.grid[6][6]) + "┃" + str(self.grid[6][7]) + "┃ 7<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  6 ┃" + \
-str(self.grid[5][0]) + "┃" + str(self.grid[5][1]) + "┃" + \
-str(self.grid[5][2]) + "┃" + str(self.grid[5][3]) + "┃" + \
-str(self.grid[5][4]) + "┃" + str(self.grid[5][5]) + "┃" + \
-str(self.grid[5][6]) + "┃" + str(self.grid[5][7]) + "┃ 6<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  5 ┃" + \
-str(self.grid[4][0]) + "┃" + str(self.grid[4][1]) + "┃" + \
-str(self.grid[4][2]) + "┃" + str(self.grid[4][3]) + "┃" + \
-str(self.grid[4][4]) + "┃" + str(self.grid[4][5]) + "┃" + \
-str(self.grid[4][6]) + "┃" + str(self.grid[4][7]) + "┃ 5<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  4 ┃" + \
-str(self.grid[3][0]) + "┃" + str(self.grid[3][1]) + "┃" + \
-str(self.grid[3][2]) + "┃" + str(self.grid[3][3]) + "┃" + \
-str(self.grid[3][4]) + "┃" + str(self.grid[3][5]) + "┃" + \
-str(self.grid[3][6]) + "┃" + str(self.grid[3][7]) + "┃ 4<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  3 ┃" + \
-str(self.grid[2][0]) + "┃" + str(self.grid[2][1]) + "┃" + \
-str(self.grid[2][2]) + "┃" + str(self.grid[2][3]) + "┃" + \
-str(self.grid[2][4]) + "┃" + str(self.grid[2][5]) + "┃" + \
-str(self.grid[2][6]) + "┃" + str(self.grid[2][7]) + "┃ 3<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  2 ┃" + \
-str(self.grid[1][0]) + "┃" + str(self.grid[1][1]) + "┃" + \
-str(self.grid[1][2]) + "┃" + str(self.grid[1][3]) + "┃" + \
-str(self.grid[1][4]) + "┃" + str(self.grid[1][5]) + "┃" + \
-str(self.grid[1][6]) + "┃" + str(self.grid[1][7]) + "┃ 2<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  1 ┃" + \
-str(self.grid[0][0]) + "┃" + str(self.grid[0][1]) + "┃" + \
-str(self.grid[0][2]) + "┃" + str(self.grid[0][3]) + "┃" + \
-str(self.grid[0][4]) + "┃" + str(self.grid[0][5]) + "┃" + \
-str(self.grid[0][6]) + "┃" + str(self.grid[0][7]) + "┃ 1<br>" + \
-"    ┗━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┛<br>" + \
-"      a   b   c   d   e   f   g   h<br><br>"
+"<div class=\"white\"></div>" + \
+"<div class=\"white toplabel\">a</div>" + \
+"<div class=\"white toplabel\">b</div>" + \
+"<div class=\"white toplabel\">c</div>" + \
+"<div class=\"white toplabel\">d</div>" + \
+"<div class=\"white toplabel\">e</div>" + \
+"<div class=\"white toplabel\">f</div>" + \
+"<div class=\"white toplabel\">g</div>" + \
+"<div class=\"white toplabel\">h</div><br>" + \
+"<div class=\"white leftlabel\">8</div>" + \
+str(self.grid[7][0]) + str(self.grid[7][1]) + \
+str(self.grid[7][2]) + str(self.grid[7][3]) + \
+str(self.grid[7][4]) + str(self.grid[7][5]) + \
+str(self.grid[7][6]) + str(self.grid[7][7]) + \
+"<div class=\"white rightlabel\">8</div><br>" + \
+"<div class=\"white leftlabel\">7</div>" + \
+str(self.grid[6][0]) + str(self.grid[6][1]) + \
+str(self.grid[6][2]) + str(self.grid[6][3]) + \
+str(self.grid[6][4]) + str(self.grid[6][5]) + \
+str(self.grid[6][6]) + str(self.grid[6][7]) + \
+"<div class=\"white rightlabel\">7</div><br>" + \
+"<div class=\"white leftlabel\">6</div>" + \
+str(self.grid[5][0]) + str(self.grid[5][1]) + \
+str(self.grid[5][2]) + str(self.grid[5][3]) + \
+str(self.grid[5][4]) + str(self.grid[5][5]) + \
+str(self.grid[5][6]) + str(self.grid[5][7]) + \
+"<div class=\"white rightlabel\">6</div><br>" + \
+"<div class=\"white leftlabel\">5</div>" + \
+str(self.grid[4][0]) + str(self.grid[4][1]) + \
+str(self.grid[4][2]) + str(self.grid[4][3]) + \
+str(self.grid[4][4]) + str(self.grid[4][5]) + \
+str(self.grid[4][6]) + str(self.grid[4][7]) + \
+"<div class=\"white rightlabel\">5</div><br>" + \
+"<div class=\"white leftlabel\">4</div>" + \
+str(self.grid[3][0]) + str(self.grid[3][1]) + \
+str(self.grid[3][2]) + str(self.grid[3][3]) + \
+str(self.grid[3][4]) + str(self.grid[3][5]) + \
+str(self.grid[3][6]) + str(self.grid[3][7]) + \
+"<div class=\"white rightlabel\">4</div><br>" + \
+"<div class=\"white leftlabel\">3</div>" + \
+str(self.grid[2][0]) + str(self.grid[2][1]) + \
+str(self.grid[2][2]) + str(self.grid[2][3]) + \
+str(self.grid[2][4]) + str(self.grid[2][5]) + \
+str(self.grid[2][6]) + str(self.grid[2][7]) + \
+"<div class=\"white rightlabel\">3</div><br>" + \
+"<div class=\"white leftlabel\">2</div>" + \
+str(self.grid[1][0]) + str(self.grid[1][1]) + \
+str(self.grid[1][2]) + str(self.grid[1][3]) + \
+str(self.grid[1][4]) + str(self.grid[1][5]) + \
+str(self.grid[1][6]) + str(self.grid[1][7]) + \
+"<div class=\"white rightlabel\">2</div><br>" + \
+"<div class=\"white leftlabel\">1</div>" + \
+str(self.grid[0][0]) + str(self.grid[0][1]) + \
+str(self.grid[0][2]) + str(self.grid[0][3]) + \
+str(self.grid[0][4]) + str(self.grid[0][5]) + \
+str(self.grid[0][6]) + str(self.grid[0][7]) + \
+"<div class=\"white rightlabel\">1</div><br>" + \
+"<div class=\"white\">&nbsp;</div>" + \
+"<div class=\"white bottomlabel\">a</div>" + \
+"<div class=\"white bottomlabel\">b</div>" + \
+"<div class=\"white bottomlabel\">c</div>" + \
+"<div class=\"white bottomlabel\">d</div>" + \
+"<div class=\"white bottomlabel\">e</div>" + \
+"<div class=\"white bottomlabel\">f</div>" + \
+"<div class=\"white bottomlabel\">g</div>" + \
+"<div class=\"white bottomlabel\">h</div><br><br>"
 
 
         # Show board from the other side for player 2
         elif player == 2:
             return "<br>" + \
-"      h   g   f   e   d   c   b   a<br>" + \
-"    ┏━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┳━━━┓<br>" + \
-"  1 ┃" + \
-str(self.grid[0][7]) + "┃" + str(self.grid[0][6]) + "┃" + \
-str(self.grid[0][5]) + "┃" + str(self.grid[0][4]) + "┃" + \
-str(self.grid[0][3]) + "┃" + str(self.grid[0][2]) + "┃" + \
-str(self.grid[0][1]) + "┃" + str(self.grid[0][0]) + "┃ 1<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  2 ┃" + \
-str(self.grid[1][7]) + "┃" + str(self.grid[1][6]) + "┃" + \
-str(self.grid[1][5]) + "┃" + str(self.grid[1][4]) + "┃" + \
-str(self.grid[1][3]) + "┃" + str(self.grid[1][2]) + "┃" + \
-str(self.grid[1][1]) + "┃" + str(self.grid[1][0]) + "┃ 2<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  3 ┃" + \
-str(self.grid[2][7]) + "┃" + str(self.grid[2][6]) + "┃" + \
-str(self.grid[2][5]) + "┃" + str(self.grid[2][4]) + "┃" + \
-str(self.grid[2][3]) + "┃" + str(self.grid[2][2]) + "┃" + \
-str(self.grid[2][1]) + "┃" + str(self.grid[2][0]) + "┃ 3<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  4 ┃" + \
-str(self.grid[3][7]) + "┃" + str(self.grid[3][6]) + "┃" + \
-str(self.grid[3][5]) + "┃" + str(self.grid[3][4]) + "┃" + \
-str(self.grid[3][3]) + "┃" + str(self.grid[3][2]) + "┃" + \
-str(self.grid[3][1]) + "┃" + str(self.grid[3][0]) + "┃ 4<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  5 ┃" + \
-str(self.grid[4][7]) + "┃" + str(self.grid[4][6]) + "┃" + \
-str(self.grid[4][5]) + "┃" + str(self.grid[4][4]) + "┃" + \
-str(self.grid[4][3]) + "┃" + str(self.grid[4][2]) + "┃" + \
-str(self.grid[4][1]) + "┃" + str(self.grid[4][0]) + "┃ 5<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  6 ┃" + \
-str(self.grid[5][7]) + "┃" + str(self.grid[5][6]) + "┃" + \
-str(self.grid[5][5]) + "┃" + str(self.grid[5][4]) + "┃" + \
-str(self.grid[5][3]) + "┃" + str(self.grid[5][2]) + "┃" + \
-str(self.grid[5][1]) + "┃" + str(self.grid[5][0]) + "┃ 6<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  7 ┃" + \
-str(self.grid[6][7]) + "┃" + str(self.grid[6][6]) + "┃" + \
-str(self.grid[6][5]) + "┃" + str(self.grid[6][4]) + "┃" + \
-str(self.grid[6][3]) + "┃" + str(self.grid[6][2]) + "┃" + \
-str(self.grid[6][1]) + "┃" + str(self.grid[6][0]) + "┃ 7<br>" + \
-"    ┣━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━╋━━━┫<br>" + \
-"  8 ┃" + \
-str(self.grid[7][7]) + "┃" + str(self.grid[7][6]) + "┃" + \
-str(self.grid[7][5]) + "┃" + str(self.grid[7][4]) + "┃" + \
-str(self.grid[7][3]) + "┃" + str(self.grid[7][2]) + "┃" + \
-str(self.grid[7][1]) + "┃" + str(self.grid[7][0]) + "┃ 8<br>" + \
-"    ┗━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┛<br>" + \
-"      h   g   f   e   d   c   b   a<br><br>"
+"<div class=\"white\"></div>" + \
+"<div class=\"white toplabel\">h</div>" + \
+"<div class=\"white toplabel\">g</div>" + \
+"<div class=\"white toplabel\">f</div>" + \
+"<div class=\"white toplabel\">e</div>" + \
+"<div class=\"white toplabel\">d</div>" + \
+"<div class=\"white toplabel\">c</div>" + \
+"<div class=\"white toplabel\">b</div>" + \
+"<div class=\"white toplabel\">a</div><br>" + \
+"<div class=\"white leftlabel\">1</div>" + \
+str(self.grid[0][7]) + str(self.grid[0][6]) + \
+str(self.grid[0][5]) + str(self.grid[0][4]) + \
+str(self.grid[0][3]) + str(self.grid[0][2]) + \
+str(self.grid[0][1]) + str(self.grid[0][0]) + \
+"<div class=\"white rightlabel\">1</div><br>" + \
+"<div class=\"white leftlabel\">2</div>" + \
+str(self.grid[1][7]) + str(self.grid[1][6]) + \
+str(self.grid[1][5]) + str(self.grid[1][4]) + \
+str(self.grid[1][3]) + str(self.grid[1][2]) + \
+str(self.grid[1][1]) + str(self.grid[1][0]) + \
+"<div class=\"white rightlabel\">2</div><br>" + \
+"<div class=\"white leftlabel\">3</div>" + \
+str(self.grid[2][7]) + str(self.grid[2][6]) + \
+str(self.grid[2][5]) + str(self.grid[2][4]) + \
+str(self.grid[2][3]) + str(self.grid[2][2]) + \
+str(self.grid[2][1]) + str(self.grid[2][0]) + \
+"<div class=\"white rightlabel\">3</div><br>" + \
+"<div class=\"white leftlabel\">4</div>" + \
+str(self.grid[3][7]) + str(self.grid[3][6]) + \
+str(self.grid[3][5]) + str(self.grid[3][4]) + \
+str(self.grid[3][3]) + str(self.grid[3][2]) + \
+str(self.grid[3][1]) + str(self.grid[3][0]) + \
+"<div class=\"white rightlabel\">4</div><br>" + \
+"<div class=\"white leftlabel\">5</div>" + \
+str(self.grid[4][7]) + str(self.grid[4][6]) + \
+str(self.grid[4][5]) + str(self.grid[4][4]) + \
+str(self.grid[4][3]) + str(self.grid[4][2]) + \
+str(self.grid[4][1]) + str(self.grid[4][0]) + \
+"<div class=\"white rightlabel\">5</div><br>" + \
+"<div class=\"white leftlabel\">6</div>" + \
+str(self.grid[5][7]) + str(self.grid[5][6]) + \
+str(self.grid[5][5]) + str(self.grid[5][4]) + \
+str(self.grid[5][3]) + str(self.grid[5][2]) + \
+str(self.grid[5][1]) + str(self.grid[5][0]) + \
+"<div class=\"white rightlabel\">6</div><br>" + \
+"<div class=\"white leftlabel\">7</div>" + \
+str(self.grid[6][7]) + str(self.grid[6][6]) + \
+str(self.grid[6][5]) + str(self.grid[6][4]) + \
+str(self.grid[6][3]) + str(self.grid[6][2]) + \
+str(self.grid[6][1]) + str(self.grid[6][0]) + \
+"<div class=\"white rightlabel\">7</div><br>" + \
+"<div class=\"white leftlabel\">8</div>" + \
+str(self.grid[7][7]) + str(self.grid[7][6]) + \
+str(self.grid[7][5]) + str(self.grid[7][4]) + \
+str(self.grid[7][3]) + str(self.grid[7][2]) + \
+str(self.grid[7][1]) + str(self.grid[7][0]) + \
+"<div class=\"white rightlabel\">8</div><br>" + \
+"<div class=\"white\">&nbsp;</div>" + \
+"<div class=\"white bottomlabel\">h</div>" + \
+"<div class=\"white bottomlabel\">g</div>" + \
+"<div class=\"white bottomlabel\">f</div>" + \
+"<div class=\"white bottomlabel\">e</div>" + \
+"<div class=\"white bottomlabel\">d</div>" + \
+"<div class=\"white bottomlabel\">c</div>" + \
+"<div class=\"white bottomlabel\">b</div>" + \
+"<div class=\"white bottomlabel\">a</div><br><br>"
 
         else:
             raise ValueError("Need input of 1 or 2")
