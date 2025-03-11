@@ -135,6 +135,7 @@ class Game(object):
     <html>
         <head>
             <title>Chess game in progress</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
             <link rel="shortcut icon" href="{favicon_code}">
             <style>
                 input, div {{ display: block; }}

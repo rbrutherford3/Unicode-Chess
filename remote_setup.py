@@ -40,6 +40,7 @@ def remoteSetup(new_game: bool, game_code: int, player_choice: int):
 <html>
     <head>
         <title>Chess game setup</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" href="{favicon_code}">
         <style>
             input, div {{ display: block; }}
@@ -69,9 +70,10 @@ def homeScreen():
 <html>
     <head>
         <title>Chess game setup</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" href="{favicon_code}">
         <style>
-            nput, div {{ display: block; }}
+            input, div {{ display: block; }}
             .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 10px; }}
             label {{ font-weight: bold; font-size: 12pt; }}
             .error {{ color: red; }}
