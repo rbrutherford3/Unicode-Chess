@@ -73,7 +73,7 @@ def homeScreen():
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" href="{favicon_code}">
         <style>
-            input, div {{ display: block; }}
+            input, label {{ display: inline-block; }}
             .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 10px; }}
             label {{ font-weight: bold; font-size: 12pt; }}
             .error {{ color: red; }}
@@ -127,27 +127,41 @@ def homeScreen():
         <form name="game_setup" method="post">
             <input type="hidden" name="form_type" value="setup" />
             <h1>Chess game setup</h1>
-            <p>
-                <input type="radio" name="is_game_new" id="start_new" value="1" onclick="hideSavedInput(); showPlayerInput();">
-                <label for="start_new">Start a new game</label>
-                <input type="radio" name="is_game_new" id="resume_old" value="0" onclick="hidePlayerInput(); showSavedInput();">
-                <label for="resume_old">Join or resume a game</label>
-            </p>
-            <p style="display: block;">
-                <label for="saved_game_code" id="saved_game_code_label" onclick="showSubmit();" style="display: none;">Enter code for saved game:</label>
-                <input type="text" name="saved_game_code" id="saved_game_code" onclick="showSubmit();" style="display: none;" />
-                <input type="radio" name="player_choice" id="player_choice_1" onclick="showSubmit();" value=1 style="display: none;" />
-                <label for="player_choice_1" id="player_choice_1_label" onclick="showSubmit();" style="display: none;" />Player 1 (white)</label>
-                <input type="radio" name="player_choice" id="player_choice_2" onclick="showSubmit();" value=2 style="display: none;" />
-                <label for="player_choice_2" id="player_choice_2_label" onclick="showSubmit();" style="display: none;" />Player 2 (black)</label>
-                <input type="radio" name="player_choice" id="player_choice_3" onclick="showSubmit();" value=3 style="display: none;" />
-                <label for="player_choice_3" id="player_choice_3_label" onclick="showSubmit();" style="display: none;" />Random</label>
-            </p>
-            <p>
+            <div>
+                <div>
+                    <input type="radio" name="is_game_new" id="start_new" value="1" onclick="hideSavedInput(); showPlayerInput();">
+                    <label for="start_new">Start a new game</label>
+		</div>
+                <div>
+                    <input type="radio" name="is_game_new" id="resume_old" value="0" onclick="hidePlayerInput(); showSavedInput();">
+                    <label for="resume_old">Join or resume a game</label>
+                </div>
+            </div>
+            <br>
+            <div>
+                <div>
+                    <label for="saved_game_code" id="saved_game_code_label" onclick="showSubmit();" style="display: none;">Enter code for saved game:</label>
+                    <input type="text" name="saved_game_code" id="saved_game_code" onclick="showSubmit();" style="display: none;" />
+                </div>
+                <div>
+                    <input type="radio" name="player_choice" id="player_choice_1" onclick="showSubmit();" value=1 style="display: none;" />
+                    <label for="player_choice_1" id="player_choice_1_label" onclick="showSubmit();" style="display: none;" />Player 1 (white)</label>
+                </div>
+                <div>
+                    <input type="radio" name="player_choice" id="player_choice_2" onclick="showSubmit();" value=2 style="display: none;" />
+                    <label for="player_choice_2" id="player_choice_2_label" onclick="showSubmit();" style="display: none;" />Player 2 (black)</label>
+                </div>
+                <div>
+                    <input type="radio" name="player_choice" id="player_choice_3" onclick="showSubmit();" value=3 style="display: none;" />
+                    <label for="player_choice_3" id="player_choice_3_label" onclick="showSubmit();" style="display: none;" />Random</label>
+                </div>
+            </div>
+            <br>
+            <div>
                 <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
                 <input type="hidden" name="action" value="validate_captcha">
                 <input type="submit" id="submit" value="Submit" style="display: none;" />
-            </p>
+            </div>
         </form>
     <body>
 </html>
