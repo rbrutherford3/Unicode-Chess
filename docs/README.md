@@ -5,7 +5,7 @@ This is a **Python** chess game run using [**Flask**](https://flask.palletsproje
 
 ![screenshot](screenshot.png)
 
-Go to [https://chess.spiffindustries.com/](https://chess.spiffindustries.com/) to play a game!
+Go to [https://spiffindustries.com/chess/](https://spiffindustries.com/chess/) to play a game!
 
 ## Table of Contents
 
