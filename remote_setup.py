@@ -124,7 +124,7 @@ def homeScreen():
         </script>
     </head>
     <body>
-        <form name="game_setup" method="post">
+        <form name="game_setup" method="post" action="/chess/">
             <input type="hidden" name="form_type" value="setup" />
             <h1>Chess game setup</h1>
             <div>
