@@ -17,6 +17,18 @@ app = Flask(__name__)
 app.config["DEBUG"] = False
 app.secret_key = "awf98gjhgb"
 
+# If the app needs to be served from a /chess/ subdirectory, the old redirect can
+# be restored by uncommenting the block below and updating the hosting setup so
+# requests to /chess/ are routed to this app.
+# from flask import redirect
+# @app.route("/chess/", methods=["GET"])
+# def chess_subdirectory_redirect():
+#     return redirect("/chess/")
+# To reinstate the subdirectory behavior:
+# 1. Ensure the web server or deployment target serves this app under /chess/.
+# 2. Update any links and static asset URLs to include the /chess/ prefix.
+# 3. Uncomment the import and route above, then restart the application.
+
 def handle_form_submission():
 	parameters = request.form
 	recaptcha_passed = False
@@ -70,11 +82,7 @@ def handle_form_submission():
 	else:
 		return "Unknown form type.", 400
 
-@app.route("/")
-def index():
-	return homeScreen()
-
-@app.route("/chess/", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def gameplay():
 	if request.method == "POST":
 		return handle_form_submission()
