@@ -9,7 +9,7 @@ build/
 *.spec
 white*
 black*
-games/
-recaptchav3.py
 .venv/
+.env
 tests/
+recaptchav3

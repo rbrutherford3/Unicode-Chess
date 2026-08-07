@@ -5,7 +5,7 @@ This is a **Python** chess game run using [**Flask**](https://flask.palletsproje
 
 ![screenshot](screenshot.png)
 
-Go to [https://spiffindustries.com/chess/](https://spiffindustries.com/chess/) to play a game!
+Go to [https://unicode-chess.vercel.app/](https://unicode-chess.vercel.app/) to play a game!
 
 ## Table of Contents
 
@@ -31,7 +31,23 @@ If you wish to provide this product on your own server, you must clone it:
 ```
 git clone https://github.com/rbrutherford3/Unicode-Chess.git /path/to/site/root
 ```
-To install **Flask**, follow the instructions found [here](https://flask.palletsprojects.com/en/2.2.x/installation/).  Then go to your directory and run the app:
+
+If you do not already have Python 3 and `pip`, install them first. On Debian or Ubuntu, run:
+
+```
+sudo apt install python3 python3-pip
+```
+
+Once Python and `pip` are installed, go to your directory and install the app dependencies:
+
+```
+pip install Flask
+pip install requests
+pip install jsonpickle
+```
+
+You can install them all at once with `pip install -r requirements.txt`, which uses the packages listed in `requirements.txt`.
+
 ```
 cd /path/to/site/root
 export FLASK_ENV=development
@@ -49,6 +65,8 @@ You should see a message such as:
 You may then go to http://127.0.0.1:5000/ (or http://localhost:5000/) on your browser to view the app.
 
 To run this app in a production environment, you will need to use **gunicorn** and set up a `systemd` service.  Click [here](https://www.edmondchuc.com/blog/deploying-python-flask-with-gunicorn-nginx-and-systemd) for a good tutorial on how to do so.
+
+This repository also includes `handler.py` and `vercel.json` for deploying to **Vercel**. That setup is useful for quick demos and previews, but keep in mind that game data is stored on the server filesystem, so you will need persistent storage if you want saved games to survive redeploys.
 
 ## Usage
 

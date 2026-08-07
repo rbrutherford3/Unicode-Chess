@@ -8,6 +8,7 @@
 
 
 import os
+import tempfile
 from os.path import exists
 from urllib.parse import quote, unquote
 import jsonpickle
@@ -17,6 +18,8 @@ from chess import Chess
 from flask import request, url_for
 from board import Square
 from recaptchav3 import reCAPTCHAv3
+
+GAMES_DIR = os.environ.get('GAMES_DIR', os.path.join(tempfile.gettempdir(), 'games'))
 
 
 class Game(object):
@@ -216,17 +219,19 @@ def save_game(game: Game):
     cpickle = jsonpickle.encode(game)
     cstring = quote(cpickle)
     game.filename = str(game.gamecode) + ".chess"
-    if not os.path.exists("games"):
-        os.mkdir("games")
-    cfile = open("games/" + game.filename, "w")
+    games_dir = os.path.abspath(GAMES_DIR)
+    os.makedirs(games_dir, exist_ok=True)
+    cfile = open(os.path.join(games_dir, game.filename), "w")
     cfile.write(cstring)
     cfile.close()
 
 
 # Load a game from the server
 def load_game(filename: str) -> Game:
-    if exists("games/" + filename):
-        cfile = open("games/" + filename, "r")
+    games_dir = os.path.abspath(GAMES_DIR)
+    filepath = os.path.join(games_dir, filename)
+    if exists(filepath):
+        cfile = open(filepath, "r")
         cstring = cfile.readline()
         cpickle = unquote(cstring)
         game = jsonpickle.decode(cpickle)
