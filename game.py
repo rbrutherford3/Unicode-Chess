@@ -126,7 +126,9 @@ class Game(object):
             disabled_submit = " disabled"
         save_game(self)
         output = self.chess_game.drawBoard(player)
-        if player == self.chess_game.currentPlayer:
+        if not self.chess_game.gameOn:
+            header_text = "Game over!"
+        elif player == self.chess_game.currentPlayer:
             header_text = "Your turn!"
         else:
             header_text = "Awaiting opponent..."
