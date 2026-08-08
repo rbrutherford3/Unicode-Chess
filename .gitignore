@@ -12,4 +12,4 @@ black*
 .venv/
 .env
 tests/
-recaptchav3
+environment_vars
