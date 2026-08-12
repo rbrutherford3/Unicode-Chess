@@ -41,7 +41,10 @@ def remoteSetup(new_game: bool, game_code: int, player_choice: int):
     <head>
         <title>Chess game setup</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="shortcut icon" href="{favicon_code}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{favicon_32}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{favicon_16}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
+        <link rel="manifest" href="{manifest}">
         <style>
             input, div {{ display: block; }}
             .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 10px; }}
@@ -62,7 +65,11 @@ def remoteSetup(new_game: bool, game_code: int, player_choice: int):
         <a href="?game={game}&player={player}" style="text-decoration: none;"><input type="button" value="Start game" /></a>
     </body>
 </html>
-            '''.format(game_code=game_code,player_code=player_code,game=game_code,player=player_code,favicon_code=url_for('static', filename='favicon.ico'))
+            '''.format(game_code=game_code,player_code=player_code,game=game_code,player=player_code,
+                       favicon_32=url_for('static', filename='favicon-32x32.png'),
+                       favicon_16=url_for('static', filename='favicon-16x16.png'),
+                       apple_touch_icon=url_for('static', filename='apple-touch-icon.png'),
+                       manifest=url_for('static', filename='site.webmanifest'))
 
 def homeScreen():
     return '''
@@ -71,7 +78,10 @@ def homeScreen():
     <head>
         <title>Chess game setup</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="shortcut icon" href="{favicon_code}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{favicon_32}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{favicon_16}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
+        <link rel="manifest" href="{manifest}">
         <style>
             input, label {{ display: inline-block; }}
             .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 10px; }}
@@ -165,4 +175,8 @@ def homeScreen():
         </form>
     <body>
 </html>
-'''.format(favicon_code=url_for('static', filename='favicon.ico'), reCAPTCHA_site_key=reCAPTCHAv3.site_key)
+'''.format(favicon_32=url_for('static', filename='favicon-32x32.png'),
+           favicon_16=url_for('static', filename='favicon-16x16.png'),
+           apple_touch_icon=url_for('static', filename='apple-touch-icon.png'),
+           manifest=url_for('static', filename='site.webmanifest'),
+           reCAPTCHA_site_key=reCAPTCHAv3.site_key)

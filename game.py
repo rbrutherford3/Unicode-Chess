@@ -141,7 +141,10 @@ class Game(object):
         <head>
             <title>Chess game in progress</title>
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <link rel="shortcut icon" href="{favicon_code}">
+            <link rel="icon" type="image/png" sizes="32x32" href="{favicon_32}">
+            <link rel="icon" type="image/png" sizes="16x16" href="{favicon_16}">
+            <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
+            <link rel="manifest" href="{manifest}">
             <style>
                 input, div {{ display: block; }}
                 .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 0px; }}
@@ -213,7 +216,10 @@ class Game(object):
         '''.format(game_code=self.gamecode, player_code=player_code, awaiting_turn=awaiting_turn, output=output, error=error,
                    pawn_label_hidden=pawn_label_hidden, pawn_dialog_hidden=pawn_dialog_hidden, promotion=promotion,
                    game_status=game_status, disabled_input1=disabled_input, disabled_input2=disabled_input,
-                   disabled_submit=disabled_submit, favicon_code=url_for('static', filename='favicon.ico'),
+                   disabled_submit=disabled_submit, favicon_32=url_for('static', filename='favicon-32x32.png'),
+                   favicon_16=url_for('static', filename='favicon-16x16.png'),
+                   apple_touch_icon=url_for('static', filename='apple-touch-icon.png'),
+                   manifest=url_for('static', filename='site.webmanifest'),
                    header_text=header_text, reCAPTCHA_site_key=reCAPTCHAv3.site_key)
 
 
