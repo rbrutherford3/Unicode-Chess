@@ -7,43 +7,122 @@
 #################################################################
 
 
-import os
-import tempfile
-from os.path import exists
-from urllib.parse import quote, unquote
-import jsonpickle
-from random import randint
-from hashlib import shake_128
+import secrets
 from chess import Chess
 from flask import request, url_for
 from board import Square
+from pieces import (
+    BlackBishop,
+    BlackKing,
+    BlackKnight,
+    BlackPawn,
+    BlackQueen,
+    BlackRook,
+    WhiteBishop,
+    WhiteKing,
+    WhiteKnight,
+    WhitePawn,
+    WhiteQueen,
+    WhiteRook,
+)
 from recaptchav3 import reCAPTCHAv3
-
-GAMES_DIR = os.environ.get('GAMES_DIR', os.path.join(tempfile.gettempdir(), 'games'))
+from game_store import load_game, save_game
 
 
 class Game(object):
 
     gamecode: int
-    filename: str
     chess_game: Chess
     player1code: int
     player2code: int
     hostPlayer: int
     guestPlayer: int
+    version: int
 
     def __init__(self, gamecode: int):
-
         if gamecode is None:
-            gamecode = randint(1000,9999)
-            self.gamecode = gamecode
-            gameHash = shake_128()
-            gameHash.update(gamecode.to_bytes(4, 'big'))
-            gameHash = gameHash.digest(4)
-            self.player1code = int(str(gameHash.hex())[0:4], 16)
-            self.player2code = int(str(gameHash.hex())[4:8], 16)
+            self.gamecode = secrets.randbelow(900000) + 100000
+            self.player1code = secrets.randbelow(9000000000000000) + 1000000000000000
+            self.player2code = secrets.randbelow(9000000000000000) + 1000000000000000
             self.chess_game = Chess()
-        self.filename = str(gamecode) + '.chess'
+            self.version = 0
+
+    @classmethod
+    def from_state(cls, state: dict, version: int) -> "Game":
+        game = cls.__new__(cls)
+        game.gamecode = state["game_code"]
+        game.player1code = state["player_1_code"]
+        game.player2code = state["player_2_code"]
+        game.hostPlayer = state["host_player"]
+        game.version = version
+        game.chess_game = Chess()
+        board = game.chess_game.board
+        for row, serialized_row in enumerate(state["board"]):
+            for column, serialized_piece in enumerate(serialized_row):
+                square = board.getSquare(row, column)
+                square.piece = game._piece_from_state(serialized_piece)
+                if isinstance(square.piece, (WhiteKing, BlackKing)):
+                    if square.piece.player == 1:
+                        board.king1 = square.piece
+                    else:
+                        board.king2 = square.piece
+                    square.piece.location = square
+        game.chess_game.currentPlayer = state["current_player"]
+        game.chess_game.gameOn = state["game_on"]
+        pending_promotion = state.get("pending_promotion")
+        if pending_promotion is not None:
+            game.chess_game.endSquare = board.getSquare(*pending_promotion)
+        return game
+
+    def to_state(self) -> dict:
+        board = self.chess_game.board
+        pending_promotion = None
+        end_square = getattr(self.chess_game, "endSquare", None)
+        if end_square is not None and self.chess_game.promotePawnCheck():
+            pending_promotion = [end_square.row, end_square.column]
+        return {
+            "game_code": self.gamecode,
+            "player_1_code": self.player1code,
+            "player_2_code": self.player2code,
+            "host_player": self.hostPlayer,
+            "current_player": self.chess_game.currentPlayer,
+            "game_on": self.chess_game.gameOn,
+            "pending_promotion": pending_promotion,
+            "board": [
+                [self._piece_to_state(square.piece) for square in row]
+                for row in board.grid
+            ],
+        }
+
+    @staticmethod
+    def _piece_to_state(piece):
+        if piece is None:
+            return None
+        state = {"type": piece.name, "player": piece.player, "moved": piece.moved}
+        if isinstance(piece, (WhitePawn, BlackPawn)):
+            state["en_passant"] = piece.enPassant
+        return state
+
+    @staticmethod
+    def _piece_from_state(state):
+        if state is None:
+            return None
+        piece_classes = {
+            ("pawn", 1): WhitePawn, ("pawn", 2): BlackPawn,
+            ("knight", 1): WhiteKnight, ("knight", 2): BlackKnight,
+            ("bishop", 1): WhiteBishop, ("bishop", 2): BlackBishop,
+            ("rook", 1): WhiteRook, ("rook", 2): BlackRook,
+            ("queen", 1): WhiteQueen, ("queen", 2): BlackQueen,
+            ("king", 1): WhiteKing, ("king", 2): BlackKing,
+        }
+        try:
+            piece = piece_classes[(state["type"], state["player"])]()
+        except KeyError as error:
+            raise ValueError("Saved game contains an invalid piece") from error
+        piece.moved = state["moved"]
+        if isinstance(piece, (WhitePawn, BlackPawn)):
+            piece.enPassant = state.get("en_passant", False)
+        return piece
 
     def setHostPlayer(self, player: int):
         self.hostPlayer = player
@@ -71,6 +150,7 @@ class Game(object):
         pawn_dialog_hidden = " hidden"
         promotion = "0"
         awaiting_turn = "0"
+        should_save = False
 
         if self.player1code == player_code:
             player = 1
@@ -86,16 +166,16 @@ class Game(object):
             # and change the piece to the player's choice
             if request.form.get("promotion") == "1":
                 promotion_choice = request.form.get("promotion_pieces")
-                self.chess_game.promotePawn(promotion_choice)
-
-                # Check to see if this promotion just ended the game and process move
-                if self.chess_game.gameOn:
+                error = self.chess_game.promotePawn(promotion_choice)
+                if not error:
                     self.chess_game.switchPlayers()
                     awaiting_turn = "1"
-                    self.save_game(self.filename, self.chess_game)
+                    should_save = True
                 else:
-                    disabled_input = " disabled"  # End game
-                    disabled_submit = " disabled"
+                    promotion = 1
+                    pawn_label_hidden = ""
+                    pawn_dialog_hidden = ""
+                    disabled_input = " disabled"
 
             # If this was a normal move...
             elif ((request.form.get("next_move_start") is not None) and (
@@ -118,13 +198,16 @@ class Game(object):
                     # End move if not a promotion
                     else:
                         self.chess_game.switchPlayers()
+                    should_save = True
 
         # Check for end of game, save game, and display appropriate board to user
+        game_was_on = self.chess_game.gameOn
         game_status = self.chess_game.gameStatus(player)
         if not self.chess_game.gameOn:
             disabled_input = " disabled"
             disabled_submit = " disabled"
-        save_game(self)
+        if should_save or game_was_on != self.chess_game.gameOn:
+            save_game(self)
         output = self.chess_game.drawBoard(player)
         if not self.chess_game.gameOn:
             header_text = "Game over!"
@@ -223,27 +306,4 @@ class Game(object):
                    header_text=header_text, reCAPTCHA_site_key=reCAPTCHAv3.site_key)
 
 
-def save_game(game: Game):
-    cpickle = jsonpickle.encode(game)
-    cstring = quote(cpickle)
-    game.filename = str(game.gamecode) + ".chess"
-    games_dir = os.path.abspath(GAMES_DIR)
-    os.makedirs(games_dir, exist_ok=True)
-    cfile = open(os.path.join(games_dir, game.filename), "w")
-    cfile.write(cstring)
-    cfile.close()
 
-
-# Load a game from the server
-def load_game(filename: str) -> Game:
-    games_dir = os.path.abspath(GAMES_DIR)
-    filepath = os.path.join(games_dir, filename)
-    if exists(filepath):
-        cfile = open(filepath, "r")
-        cstring = cfile.readline()
-        cpickle = unquote(cstring)
-        game = jsonpickle.decode(cpickle)
-        cfile.close()
-        return game
-    else:
-        raise Exception("No saved game found")

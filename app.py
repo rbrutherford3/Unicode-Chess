@@ -8,7 +8,7 @@
 
 from flask import Flask, request
 from remote_setup import homeScreen, remoteSetup
-from game import load_game
+from game_store import GameNotFound, GameStoreError, GameVersionConflict, load_game
 from recaptchav3 import reCAPTCHAv3
 import requests
 
@@ -76,7 +76,7 @@ def handle_form_submission():
 			player_code = int(player_code_str)
 		except ValueError:
 			return "Invalid game or player code.", 400
-		game = load_game(str(game_code) + ".chess")
+		game = load_game(game_code)
 		return game.chess_page(player_code)
 
 	else:
@@ -90,6 +90,24 @@ def gameplay():
 		game_code = request.args.get("game")
 		player_code = request.args.get("player")
 		if ((game_code is not None) and (player_code is not None)):
-			game = load_game(game_code + ".chess")
-			return game.chess_page(int(player_code))
+			try:
+				game = load_game(int(game_code))
+				return game.chess_page(int(player_code))
+			except ValueError:
+				return "Invalid game or player code.", 400
 	return homeScreen()
+
+
+@app.errorhandler(GameNotFound)
+def game_not_found(error):
+	return str(error), 404
+
+
+@app.errorhandler(GameVersionConflict)
+def game_version_conflict(error):
+	return "The game changed in another request. Refresh the page and try again.", 409
+
+
+@app.errorhandler(GameStoreError)
+def game_store_error(error):
+	return str(error), 503

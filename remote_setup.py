@@ -8,31 +8,33 @@
 
 from flask import request, url_for
 from random import randint
-from os import system
-from hashlib import shake_128
-from game import Game, save_game, load_game
+from game import Game
+from game_store import create_game, load_game
 from recaptchav3 import reCAPTCHAv3
 
 # Initiate the game between two people
 # (decide who is white or black, provide game and player codes)
 def remoteSetup(new_game: bool, game_code: int, player_choice: int):
     if new_game:
-        game = Game(None)
-        game_code = game.gamecode
         if (player_choice == 3):
             player_choice = randint(1,2)
         if ((player_choice == 1) or (player_choice == 2)):
-            game.setHostPlayer(player_choice)
-            player_code = game.getPlayerCode(player_choice)
+            for _ in range(10):
+                game = Game(None)
+                game.setHostPlayer(player_choice)
+                player_code = game.getPlayerCode(player_choice)
+                if create_game(game):
+                    break
+            else:
+                raise Exception("Unable to allocate a unique game code")
+            game_code = game.gamecode
         else:
             raise Exception("Player choice must be either '1' or '2'")
-        save_game(game)
     else:
         if (game_code is not None and game_code > 0):
-            game = load_game(str(game_code) + '.chess')
+            game = load_game(game_code)
             player = game.getGuestPlayer()
             player_code = int(game.getPlayerCode(player))
-            save_game(game)
         else:
             raise Exception("Need game code")
     return '''
