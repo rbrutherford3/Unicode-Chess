@@ -38,6 +38,7 @@ class Game(object):
     hostPlayer: int
     guestPlayer: int
     version: int
+    guestCodeClaimed: bool
 
     def __init__(self, gamecode: int):
         if gamecode is None:
@@ -46,6 +47,7 @@ class Game(object):
             self.player2code = secrets.randbelow(9000000000000000) + 1000000000000000
             self.chess_game = Chess()
             self.version = 0
+            self.guestCodeClaimed = False
 
     @classmethod
     def from_state(cls, state: dict, version: int) -> "Game":
@@ -54,6 +56,7 @@ class Game(object):
         game.player1code = state["player_1_code"]
         game.player2code = state["player_2_code"]
         game.hostPlayer = state["host_player"]
+        game.guestCodeClaimed = state.get("guest_code_claimed", False)
         game.version = version
         game.chess_game = Chess()
         board = game.chess_game.board
@@ -85,6 +88,7 @@ class Game(object):
             "player_1_code": self.player1code,
             "player_2_code": self.player2code,
             "host_player": self.hostPlayer,
+            "guest_code_claimed": self.guestCodeClaimed,
             "current_player": self.chess_game.currentPlayer,
             "game_on": self.chess_game.gameOn,
             "pending_promotion": pending_promotion,

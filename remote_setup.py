@@ -9,7 +9,7 @@
 from flask import request, url_for
 from random import randint
 from game import Game
-from game_store import create_game, load_game
+from game_store import create_game, load_game, save_game
 from recaptchav3 import reCAPTCHAv3
 
 # Initiate the game between two people
@@ -33,6 +33,11 @@ def remoteSetup(new_game: bool, game_code: int, player_choice: int):
     else:
         if (game_code is not None and game_code > 0):
             game = load_game(game_code)
+            # The guest's player code can only be revealed once; after that, require it be entered.
+            if game.guestCodeClaimed:
+                return promptPlayerCode(game_code)
+            game.guestCodeClaimed = True
+            save_game(game)
             player = game.getGuestPlayer()
             player_code = int(game.getPlayerCode(player))
         else:
@@ -72,6 +77,55 @@ def remoteSetup(new_game: bool, game_code: int, player_choice: int):
                        favicon_16=url_for('static', filename='favicon-16x16.png'),
                        apple_touch_icon=url_for('static', filename='apple-touch-icon.png'),
                        manifest=url_for('static', filename='site.webmanifest'))
+
+# Ask a returning player for their player code once the game/guest code has already been claimed
+def promptPlayerCode(game_code: int, error: str = "") -> str:
+    return '''
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chess game setup</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" sizes="32x32" href="{favicon_32}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{favicon_16}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
+        <link rel="manifest" href="{manifest}">
+        <style>
+            input, div {{ display: block; }}
+            label {{ font-weight: bold; font-size: 12pt; }}
+            .error {{ color: red; }}
+        </style>
+        <script src="https://www.google.com/recaptcha/api.js?render={reCAPTCHA_site_key}"></script>
+        <script>
+            grecaptcha.ready(function () {{
+                grecaptcha.execute('{reCAPTCHA_site_key}', {{action: 'validate_captcha'}}).then(function (token) {{
+                    console.info("got token: " + token);
+                    document.getElementById('g-recaptcha-response').value = token;
+                }});
+            }});
+        </script>
+    </head>
+    <body>
+        <form method="post" action="/">
+            <input type="hidden" name="form_type" value="join_verify" />
+            <input type="hidden" name="game_code" value="{game_code}" />
+            <h1>Enter your player code</h1>
+            This game code has already been claimed. Enter your player code to continue.
+            <h3 class="error">{error}</h3>
+            <label for="player_code">Player code:</label>
+            <input type="text" name="player_code" id="player_code" autofocus />
+            <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+            <input type="hidden" name="action" value="validate_captcha">
+            <input type="submit" value="Submit" />
+        </form>
+    </body>
+</html>
+            '''.format(game_code=game_code, error=error,
+                       favicon_32=url_for('static', filename='favicon-32x32.png'),
+                       favicon_16=url_for('static', filename='favicon-16x16.png'),
+                       apple_touch_icon=url_for('static', filename='apple-touch-icon.png'),
+                       manifest=url_for('static', filename='site.webmanifest'),
+                       reCAPTCHA_site_key=reCAPTCHAv3.site_key)
 
 def homeScreen():
     return '''

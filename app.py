@@ -6,8 +6,8 @@
 #                                                               #
 #################################################################
 
-from flask import Flask, request
-from remote_setup import homeScreen, remoteSetup
+from flask import Flask, redirect, request, url_for
+from remote_setup import homeScreen, promptPlayerCode, remoteSetup
 from game_store import GameNotFound, GameStoreError, GameVersionConflict, load_game
 from recaptchav3 import reCAPTCHAv3
 import requests
@@ -78,6 +78,24 @@ def handle_form_submission():
 			return "Invalid game or player code.", 400
 		game = load_game(game_code)
 		return game.chess_page(player_code)
+
+	elif formtype == "join_verify":
+		game_code_str = request.form.get("game_code")
+		player_code_str = request.form.get("player_code")
+		if game_code_str is None:
+			return "Missing game code.", 400
+		try:
+			game_code = int(game_code_str)
+		except ValueError:
+			return "Invalid game code.", 400
+		try:
+			player_code = int(player_code_str) if player_code_str is not None else None
+		except ValueError:
+			player_code = None
+		game = load_game(game_code)
+		if player_code is None or player_code not in (game.player1code, game.player2code):
+			return promptPlayerCode(game_code, error="Incorrect player code")
+		return redirect(url_for("gameplay", game=game_code, player=player_code))
 
 	else:
 		return "Unknown form type.", 400
