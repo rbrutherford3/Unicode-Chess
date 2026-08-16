@@ -56,21 +56,22 @@ source .venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-#### 5. Create Google reCAPTCHAv3 site key and secret keys, making sure your reCAPTCHA configuration allows `localhost` and `127.0.0.1`
+#### 5. Create a Cloudflare Turnstile widget and site key/secret, making sure the widget's allowed domains include `localhost` and `127.0.0.1`
 
 #### 6. Create a [neon](https://neon.com/) account and get a connection URL like the own shown below in step 7
 
-#### 7. Set the reCAPTCHA variables and a PostgreSQL connection string before running the app:
+#### 7. Set the Turnstile variables and a PostgreSQL connection string before running the app:
 
 ```
-export RECAPTCHA_SITE_KEY="your-site-key"
-export RECAPTCHA_SECRET_KEY="your-secret-key"
+export TURNSTILE_SITE_KEY="your-turnstile-site-key"
+export TURNSTILE_SECRET="your-turnstile-secret"
+export TURNSTILE_HOSTNAMES="localhost,127.0.0.1"
 export DATABASE_URL="postgresql://username:password@host/database?sslmode=require"
 ```
 
 Note that these variables are required whether you are running locally or in production.
 
-If you are deploying to Vercel, set the same values in your Vercel project environment variables so the app can access them at runtime.
+If you deploy on Vercel, add `TURNSTILE_SECRET`, `TURNSTILE_SITE_KEY`, and `TURNSTILE_HOSTNAMES` to the project environment. Set `TURNSTILE_HOSTNAMES` to the production frontend hostnames only, for example `unicode-chess.vercel.app`; do not include local development hosts in production.
 
 #### 8. Optional: enable Flask debug mode before running:
 
@@ -94,7 +95,7 @@ You should see something like the following:
 ...
 ```
 
-This means you can now go to `localhost:5000` or `127.0.0.1:5000` in your browser to use the program. To start or join a game successfully, the reCAPTCHA keys from step 5 must be valid for that local host.
+This means you can now go to `localhost:5000` or `127.0.0.1:5000` in your browser to use the program. To start or join a game successfully, the Turnstile keys from step 5 must be valid for that local host.
 
 #### 10. Optional: when you are done using the app, deactivate the virtual environment:
 ```

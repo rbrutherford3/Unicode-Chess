@@ -10,7 +10,7 @@ from flask import request, url_for
 from random import randint
 from game import Game
 from game_store import create_game, load_game, save_game
-from recaptchav3 import reCAPTCHAv3
+from turnstile import Turnstile
 
 # Initiate the game between two people
 # (decide who is white or black, provide game and player codes)
@@ -95,15 +95,6 @@ def promptPlayerCode(game_code: int, error: str = "") -> str:
             label {{ font-weight: bold; font-size: 12pt; }}
             .error {{ color: red; }}
         </style>
-        <script src="https://www.google.com/recaptcha/api.js?render={reCAPTCHA_site_key}"></script>
-        <script>
-            grecaptcha.ready(function () {{
-                grecaptcha.execute('{reCAPTCHA_site_key}', {{action: 'validate_captcha'}}).then(function (token) {{
-                    console.info("got token: " + token);
-                    document.getElementById('g-recaptcha-response').value = token;
-                }});
-            }});
-        </script>
     </head>
     <body>
         <form method="post" action="/">
@@ -114,8 +105,6 @@ def promptPlayerCode(game_code: int, error: str = "") -> str:
             <h3 class="error">{error}</h3>
             <label for="player_code">Player code:</label>
             <input type="text" name="player_code" id="player_code" autofocus />
-            <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
-            <input type="hidden" name="action" value="validate_captcha">
             <input type="submit" value="Submit" />
         </form>
     </body>
@@ -124,8 +113,7 @@ def promptPlayerCode(game_code: int, error: str = "") -> str:
                        favicon_32=url_for('static', filename='favicon-32x32.png'),
                        favicon_16=url_for('static', filename='favicon-16x16.png'),
                        apple_touch_icon=url_for('static', filename='apple-touch-icon.png'),
-                       manifest=url_for('static', filename='site.webmanifest'),
-                       reCAPTCHA_site_key=reCAPTCHAv3.site_key)
+                       manifest=url_for('static', filename='site.webmanifest'))
 
 def homeScreen():
     return '''
@@ -174,23 +162,35 @@ def homeScreen():
                 document.getElementById("player_choice_3_label").style.display = "none";
                 return 0;
             }}
-            function showSubmit() {{
-                document.getElementById("submit").style.display = "initial";
+            let formReady = false;
+            let turnstileDone = false;
+            function maybeShowSubmit() {{
+                if (formReady && turnstileDone) {{
+                    document.getElementById("submit").style.display = "initial";
+                }}
+                return 0;
+            }}
+            function markFormReady() {{
+                formReady = true;
+                maybeShowSubmit();
+                return 0;
+            }}
+            function onTurnstileSuccess() {{
+                turnstileDone = true;
+                maybeShowSubmit();
+                return 0;
+            }}
+            function blockSubmitUntilTurnstile(event) {{
+                if (!turnstileDone) {{
+                    event.preventDefault();
+                }}
                 return 0;
             }}
         </script>
-        <script src="https://www.google.com/recaptcha/api.js?render={reCAPTCHA_site_key}"></script>
-        <script>
-            grecaptcha.ready(function () {{
-                grecaptcha.execute('{reCAPTCHA_site_key}', {{action: 'validate_captcha'}}).then(function (token) {{
-                    console.info("got token: " + token);
-                    document.getElementById('g-recaptcha-response').value = token;
-                }});
-            }});
-        </script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     </head>
     <body>
-        <form name="game_setup" method="post" action="/">
+        <form name="game_setup" method="post" action="/" onsubmit="blockSubmitUntilTurnstile(event);">
             <input type="hidden" name="form_type" value="setup" />
             <h1>Chess game setup</h1>
             <div>
@@ -206,26 +206,25 @@ def homeScreen():
             <br>
             <div>
                 <div>
-                    <label for="saved_game_code" id="saved_game_code_label" onclick="showSubmit();" style="display: none;">Enter code for saved game:</label>
-                    <input type="text" name="saved_game_code" id="saved_game_code" onclick="showSubmit();" style="display: none;" />
+                    <label for="saved_game_code" id="saved_game_code_label" onclick="markFormReady();" style="display: none;">Enter code for saved game:</label>
+                    <input type="text" name="saved_game_code" id="saved_game_code" onclick="markFormReady();" style="display: none;" />
                 </div>
                 <div>
-                    <input type="radio" name="player_choice" id="player_choice_1" onclick="showSubmit();" value=1 style="display: none;" />
-                    <label for="player_choice_1" id="player_choice_1_label" onclick="showSubmit();" style="display: none;" />Player 1 (white)</label>
+                    <input type="radio" name="player_choice" id="player_choice_1" onclick="markFormReady();" value=1 style="display: none;" />
+                    <label for="player_choice_1" id="player_choice_1_label" onclick="markFormReady();" style="display: none;" />Player 1 (white)</label>
                 </div>
                 <div>
-                    <input type="radio" name="player_choice" id="player_choice_2" onclick="showSubmit();" value=2 style="display: none;" />
-                    <label for="player_choice_2" id="player_choice_2_label" onclick="showSubmit();" style="display: none;" />Player 2 (black)</label>
+                    <input type="radio" name="player_choice" id="player_choice_2" onclick="markFormReady();" value=2 style="display: none;" />
+                    <label for="player_choice_2" id="player_choice_2_label" onclick="markFormReady();" style="display: none;" />Player 2 (black)</label>
                 </div>
                 <div>
-                    <input type="radio" name="player_choice" id="player_choice_3" onclick="showSubmit();" value=3 style="display: none;" />
-                    <label for="player_choice_3" id="player_choice_3_label" onclick="showSubmit();" style="display: none;" />Random</label>
+                    <input type="radio" name="player_choice" id="player_choice_3" onclick="markFormReady();" value=3 style="display: none;" />
+                    <label for="player_choice_3" id="player_choice_3_label" onclick="markFormReady();" style="display: none;" />Random</label>
                 </div>
             </div>
             <br>
             <div>
-                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
-                <input type="hidden" name="action" value="validate_captcha">
+                <div class="cf-turnstile" data-sitekey="{turnstile_site_key}" data-action="setup" data-callback="onTurnstileSuccess"></div>
                 <input type="submit" id="submit" value="Submit" style="display: none;" />
             </div>
         </form>
@@ -235,4 +234,4 @@ def homeScreen():
            favicon_16=url_for('static', filename='favicon-16x16.png'),
            apple_touch_icon=url_for('static', filename='apple-touch-icon.png'),
            manifest=url_for('static', filename='site.webmanifest'),
-           reCAPTCHA_site_key=reCAPTCHAv3.site_key)
+           turnstile_site_key=Turnstile.site_key)

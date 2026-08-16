@@ -9,7 +9,7 @@
 from flask import Flask, redirect, request, url_for
 from remote_setup import homeScreen, promptPlayerCode, remoteSetup
 from game_store import GameNotFound, GameStoreError, GameVersionConflict, load_game
-from recaptchav3 import reCAPTCHAv3
+from turnstile import Turnstile
 import requests
 
 # Initiate flask program
@@ -29,23 +29,35 @@ app.secret_key = "awf98gjhgb"
 # 2. Update any links and static asset URLs to include the /chess/ prefix.
 # 3. Uncomment the import and route above, then restart the application.
 
-def handle_form_submission():
-	parameters = request.form
-	recaptcha_passed = False
-	recaptcha_response = parameters.get('g-recaptcha-response')
+def verify_turnstile(expected_action):
+	token = request.form.get('cf-turnstile-response')
+	if not isinstance(token, str) or not token or len(token) > 2048 or not Turnstile.hostnames:
+		return False
 	try:
-		recaptcha_secret = reCAPTCHAv3.secret_key
-		response = requests.post(f'https://www.google.com/recaptcha/api/siteverify?secret={recaptcha_secret}&response={recaptcha_response}').json()
-		recaptcha_passed = response.get('success')
+		response = requests.post(
+			'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+			data={
+				'secret': Turnstile.secret_key,
+				'response': token,
+				'remoteip': request.remote_addr,
+			},
+			timeout=10,
+		).json()
 	except Exception as e:
-		print(f"failed to get reCaptcha: {e}")
+		print(f"failed to verify Turnstile token: {e}")
+		return False
+	return (
+		response.get('success') is True
+		and response.get('action') == expected_action
+		and response.get('hostname') in Turnstile.hostnames
+	)
 
-	if not recaptcha_passed:
-		return "Are you human!?"
-
+def handle_form_submission():
 	formtype = request.form.get("form_type")
 
 	if formtype == "setup":
+		if not verify_turnstile("setup"):
+			return "Are you human!?"
 		new_game = request.form.get("is_game_new") == "1"
 		if new_game:
 			player_choice_str = request.form.get("player_choice")
