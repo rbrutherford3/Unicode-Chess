@@ -232,17 +232,61 @@ class Game(object):
             <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
             <link rel="manifest" href="{manifest}">
             <style>
-                input, div {{ display: block; }}
-                .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 0px; }}
-                label, h3 {{ font-weight: bold; }}
-                .error {{ color: red; }}
-                .gameStatus {{ color: green; }}
+                :root {{
+                    color-scheme: light;
+                    font-family: Georgia, "Times New Roman", serif;
+                    background: #e9edf1;
+                    color: #20252b;
+                }}
+                * {{ box-sizing: border-box; }}
+                body {{
+                    max-width: 900px;
+                    min-height: 100vh;
+                    margin: 0 auto;
+                    padding: 2rem 1.25rem;
+                    background: #fff;
+                }}
+                form {{ max-width: 760px; margin: 0 auto; }}
+                h3 {{ margin: 0.7rem 0 0.35rem; }}
+                label {{ display: inline-block; margin: 0.35rem 0 0.2rem; font-weight: 700; }}
+                #move_form input[type="text"] {{ display: block; width: 100%; margin: 0.2rem 0 0.7rem; }}
+                input:not([type="hidden"]):not([type="radio"]), select {{
+                    min-height: 2.4rem;
+                    max-width: 100%;
+                    margin: 0.15rem 0 0.7rem;
+                    padding: 0.45rem 0.7rem;
+                    border: 1px solid #aeb7c0;
+                    border-radius: 4px;
+                    background: #fff;
+                    color: inherit;
+                    font: inherit;
+                }}
+                input[type="submit"] {{ min-width: 7rem; border: 1px solid #aeb7c0; border-radius: 4px; background: #fff; color: #111827; cursor: pointer; font-weight: 700; }}
+                input[type="submit"]:hover {{ background: #f3f4f6; }}
+                input[type="submit"]:disabled {{ background: #e5e7eb; color: #6b7280; cursor: not-allowed; }}
+                input[type="text"]:disabled {{ background: #e3e7eb; color: #68737d; cursor: not-allowed; opacity: 1; }}
+                .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 0; line-height: 1.1; }}
+                .error {{ color: #a52d2d; }}
+                .gameStatus {{ color: #286548; }}
                 .white {{ display: inline-block; width: 25px; height: 25px; line-height: 25px; text-align: center; font-size: 20px; background-color: white; }}
                 .black {{ display: inline-block; width: 25px; height: 25px; line-height: 25px; text-align: center; font-size: 20px; background-color: darkgray; }}
                 .toplabel {{ border-bottom: 1px solid black; }}
                 .bottomlabel {{ border-top: 1px solid black; }}
                 .leftlabel {{ border-right: 1px solid black; }}
                 .rightlabel {{ border-left: 1px solid black; }}
+                @media (max-width: 480px) {{
+                    body {{ padding: 1rem 0.75rem; }}
+                    form {{ max-width: 100%; }}
+                    h3 {{ margin: 0.5rem 0 0.25rem; }}
+                    label {{ margin: 0.25rem 0 0.15rem; }}
+                    #move_form input[type="text"] {{ margin: 0.15rem 0 0.55rem; }}
+                    input:not([type="hidden"]):not([type="radio"]), select {{
+                        min-height: 2.2rem;
+                        margin: 0.1rem 0 0.5rem;
+                        padding: 0.4rem 0.6rem;
+                    }}
+                    .board {{ font-size: x-small; }}
+                }}
             </style>
             <script>
                 function sleep(ms) {{
@@ -280,10 +324,11 @@ class Game(object):
                 <input type="hidden" name="promotion" value={promotion} />
                 <h3 class="gameStatus">{game_status}</h3>
                 <label for="next_move_start">Select piece to move:</label>
-                <input type="text" id="next_move_start" name="next_move_start" style="margin: 10px;" {disabled_input2} \
+                <input type="text" id="next_move_start" name="next_move_start" {disabled_input2} \
                 autofocus/>
+                <br>
                 <label for="next_move_end">Select square to move to:</label>
-                <input type="text" id="next_move_end" name="next_move_end" style="margin: 10px;" {disabled_input1} />
+                <input type="text" id="next_move_end" name="next_move_end" {disabled_input1} />
                 <input type="submit" {disabled_submit} />
             </form>
        </body>

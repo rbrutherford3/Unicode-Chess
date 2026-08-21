@@ -53,11 +53,64 @@ def remoteSetup(new_game: bool, game_code: int, player_choice: int):
         <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
         <link rel="manifest" href="{manifest}">
         <style>
-            input, div {{ display: block; }}
+            :root {{
+                color-scheme: light;
+                font-family: Georgia, "Times New Roman", serif;
+                background: #e9edf1;
+                color: #20252b;
+            }}
+            * {{ box-sizing: border-box; }}
+            body {{
+                max-width: 760px;
+                min-height: 100vh;
+                margin: 0 auto;
+                padding: 3rem 1.25rem;
+                background: #ffffff;
+            }}
+            h1 {{
+                margin: 0 0 0.75rem;
+                color: #17212b;
+                font-size: clamp(1.8rem, 5vw, 2.6rem);
+                line-height: 1.1;
+            }}
+            h2 {{
+                margin: 0.5rem 0 2rem;
+                padding: 0.8rem 1rem;
+                border-left: 4px solid #4b5563;
+                background: #eef2f7;
+                color: #1f2937;
+                font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+                letter-spacing: 0.08em;
+            }}
+            input:not([type="hidden"]):not([type="radio"]), select {{
+                min-height: 2.6rem;
+                max-width: 100%;
+                margin: 0.35rem 0 0.9rem;
+                padding: 0.55rem 0.7rem;
+                border: 1px solid #aeb7c0;
+                border-radius: 4px;
+                background: #fff;
+                color: inherit;
+                font: inherit;
+            }}
+            input[type="radio"] {{ accent-color: #111827; }}
+            input[type="submit"], input[type="button"] {{
+                min-width: 7rem;
+                margin-top: 0.75rem;
+                border: 1px solid #aeb7c0;
+                border-radius: 4px;
+                background: #fff;
+                color: #111827;
+                cursor: pointer;
+                font-weight: 700;
+            }}
+            input[type="submit"]:hover, input[type="button"]:hover {{ background: #f3f4f6; }}
+            input[type="submit"]:disabled {{ background: #aeb7c0; cursor: not-allowed; }}
+            a, a:link, a:visited, a:hover, a:active {{ color: #111827; text-decoration: none; }}
             .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 10px; }}
-            label {{ font-weight: bold; font-size: 12pt; }}
-            .error {{ color: red; }}
-            .gameStatus {{ color: green; }}
+            label {{ display: inline-block; margin: 0.7rem 0 0.35rem; font-weight: 700; }}
+            .error {{ color: #a52d2d; }}
+            .gameStatus {{ color: #286548; }}
         </style>
     </head>
     <body>
@@ -69,7 +122,7 @@ def remoteSetup(new_game: bool, game_code: int, player_choice: int):
             next page).  If you give this code to your opponent then they will \
             be able to move your pieces, so be careful)
         <h2>{player_code}</h2>
-        <a href="?game={game}&player={player}" style="text-decoration: none;"><input type="button" value="Start game" /></a>
+        <a href="?game={game}&player={player}" style="color: #111827; text-decoration: none;"><input type="button" value="Start game" /></a>
     </body>
 </html>
             '''.format(game_code=game_code,player_code=player_code,game=game_code,player=player_code,
@@ -91,9 +144,16 @@ def promptPlayerCode(game_code: int, error: str = "") -> str:
         <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
         <link rel="manifest" href="{manifest}">
         <style>
-            input, div {{ display: block; }}
-            label {{ font-weight: bold; font-size: 12pt; }}
-            .error {{ color: red; }}
+            :root {{ color-scheme: light; font-family: Georgia, "Times New Roman", serif; background: #e9edf1; color: #20252b; }}
+            * {{ box-sizing: border-box; }}
+            body {{ max-width: 760px; min-height: 100vh; margin: 0 auto; padding: 3rem 1.25rem; background: #fff; }}
+            h1 {{ margin: 0 0 0.75rem; color: #17212b; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.1; }}
+            form {{ max-width: 560px; margin: 0 auto; }}
+            label {{ display: inline-block; margin: 0.7rem 0 0.35rem; font-weight: 700; }}
+            input:not([type="hidden"]):not([type="radio"]) {{ min-height: 2.6rem; max-width: 100%; margin: 0.35rem 0 0.9rem; padding: 0.55rem 0.7rem; border: 1px solid #aeb7c0; border-radius: 4px; background: #fff; color: inherit; font: inherit; }}
+            input[type="submit"] {{ min-width: 7rem; margin-top: 0.75rem; border: 1px solid #aeb7c0; border-radius: 4px; background: #fff; color: #111827; cursor: pointer; font-weight: 700; }}
+            input[type="submit"]:hover {{ background: #f3f4f6; }}
+            .error {{ color: #a52d2d; }}
         </style>
     </head>
     <body>
@@ -127,11 +187,40 @@ def homeScreen():
         <link rel="apple-touch-icon" sizes="180x180" href="{apple_touch_icon}">
         <link rel="manifest" href="{manifest}">
         <style>
-            input, label {{ display: inline-block; }}
+            :root {{
+                color-scheme: light;
+                font-family: Georgia, "Times New Roman", serif;
+                background: #e9edf1;
+                color: #20252b;
+            }}
+            * {{ box-sizing: border-box; }}
+            body {{
+                max-width: 760px;
+                min-height: 100vh;
+                margin: 0 auto;
+                padding: 3rem 1.25rem;
+                background: #fff;
+            }}
+            h1 {{ margin: 0 0 1.5rem; color: #17212b; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.1; }}
+            form {{ max-width: 560px; margin: 0 auto; }}
+            input:not([type="hidden"]):not([type="radio"]), select {{
+                min-height: 2.6rem;
+                max-width: 100%;
+                padding: 0.55rem 0.7rem;
+                border: 1px solid #aeb7c0;
+                border-radius: 4px;
+                background: #fff;
+                color: inherit;
+                font: inherit;
+            }}
+            input[type="radio"] {{ accent-color: #111827; }}
+            input[type="submit"] {{ min-width: 7rem; margin-top: 0.75rem; border: 1px solid #aeb7c0; border-radius: 4px; background: #fff; color: #111827; cursor: pointer; font-weight: 700; }}
+            input[type="submit"]:hover {{ background: #f3f4f6; }}
+            input[type="submit"]:disabled {{ background: #aeb7c0; cursor: not-allowed; }}
             .board {{ white-space: pre; font-family: monospace, monospace; font-size: small; margin: 10px; }}
-            label {{ font-weight: bold; font-size: 12pt; }}
-            .error {{ color: red; }}
-            .gameStatus {{ color: green; }}
+            label {{ margin: 0.7rem 0 0.35rem; font-weight: 700; }}
+            .error {{ color: #a52d2d; }}
+            .gameStatus {{ color: #286548; }}
         </style>
         <script>
             function showSavedInput() {{
